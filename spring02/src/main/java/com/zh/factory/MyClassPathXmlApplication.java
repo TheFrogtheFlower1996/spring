@@ -1,108 +1,17 @@
-# spring
+package com.zh.factory;
 
-* 学习内容
-~~~text
-Spring IOC 控制反转、依赖注入
-Spring AOP 面向切面编程
-Spring JDBC + 事务
-Spring Task 定时调度
-Spring Mail 邮件发送
-~~~
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.Element;
+import org.dom4j.XPath;
+import org.dom4j.io.SAXReader;
 
-* Spring的作用
-~~~text
-Controller层
-    Servlet（接收请求、响应数据、地址配置、页面转发）
-    对应框架：Spring MVC
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-Service层
-    Spring框架并不是针对service层的业务逻辑的，service没有适合框架
-
-DAO层
-    JDBC操作
-    对应的框架：MyBatis
-~~~
-
-* Spring基于分布式的应用程序
-~~~text
-基于轻量级的框架
-    配置管理
-    Bean对象的实例化-IOC
-
-集成第三方框架
-    MyBatis、Hibernate（持久层框架）
-    Spring MVC
-    Spring Security权限
-    Quartz时钟框架（定时任务处理）
-    Elasticsearch搜索引擎
-
-自带服务
-    Mail邮件发送
-    Task定时任务处理-定时调度（定时短信、定时任务）
-    消息处理（异步处理）
-~~~
-
-* Spring模块划分
-~~~text
-Spring IOC模块：Bean对象的实例化，Bean的创建
-Spring AOP模块：面向切面编程，动态代理
-Spring JDBC + 事务模块
-Spring Web模块
-
-~~~
-
-# Spring IOC容器 Bean对象实例化模拟实现
-* 定义工具类
-~~~java
-public class UserDao {
-    public void test(){
-        System.out.println("UserDao类");
-    }
-}
-~~~
-
-* 定义spring XML配置文件
-~~~xml
-<?xml version="1.0" encoding="UTF-8"?>
-<beans >
-
-    <bean id="userDao" clazz="com.zh.dao.UserDao"></bean>
-    <bean id="userService" clazz="com.zh.service.UserService"></bean>
-
-</beans>
-~~~
-
-* 定义MyBean实体类，用于存放id和class的值
-~~~java
-/**
- * @author zh
- * @date 2022/3/25 11:34
- * @description: Bean属性对象，用来存放配置文件中的bean标签和class属性值
- */
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class MyBean {
-
-    private String id;
-    private String clazz;
-
-}
-
-~~~
-
-* 定义一个工厂接口 MyFactory 和一个抽象方法 getBean()
-~~~java
-//工厂模式：自定义工具类
-public interface MyFactory {
-
-    //通过id属性值获取实例化对象
-    public Object getBean(String id);
-}
-~~~
-
-* 定义工厂接口实现类MyClassPathXmlApplication，实现MyFactory工厂接口
-~~~java
 /**
  * @author zh
  * @date 2022/3/25 11:53
@@ -204,65 +113,3 @@ public class MyClassPathXmlApplication implements MyFactory{
         return object;
     }
 }
-~~~
-
-* 实现类
-~~~java
-public class Starter {
-    public static void main(String[] args) {
-
-        //得到spring上下文环境，ApplicationContext接口代表Spring IOC容器，并负责实例化，配置和组装Bean
-        BeanFactory ac = new ClassPathXmlApplicationContext("spring.xml");
-
-        //得到被实例化的对象
-        UseService us = (UseService) ac.getBean("useService");
-
-        us.test1();
-    }
-
-}
-~~~
-
-# Spring IOC加载配置文件
-
-1. 通过相对路径加载配置文件
-~~~java
-BeanFactory ac = new ClassPathXmlApplicationContext("spring.xml");
-~~~
-
-2. 加载多个配置文件
-~~~java
-BeanFactory ac = new ClassPathXmlApplicationContext("spring.xml","beans.xml");
-~~~
-
-3，设置一个总配置文件，在总配置文件中导入要加载的配置文件
-
-总配置文件
-~~~xml
-<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
-
-    <!--总配置文件-->
-    <import resource="spring.xml"></import>
-    <import resource="beans.xml"></import>
-</beans>
-~~~
-
-# Spring IOC容器 Bean对象实例化
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

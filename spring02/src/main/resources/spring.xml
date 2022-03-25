@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans >
+
+    <bean id="userDao" clazz="com.zh.dao.UserDao"></bean>
+    <bean id="userService" clazz="com.zh.service.UserService"></bean>
+
+</beans>
