@@ -252,10 +252,83 @@ BeanFactory ac = new ClassPathXmlApplicationContext("spring.xml","beans.xml");
 
 # Spring IOC容器 Bean对象实例化
 
+## 构造器实例化
+
+* 设置配置文件 spring.xml
+~~~xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="useService" class="com.zh.service.UseService"></bean>
+    
+</beans>
+~~~
+
+* 获取实例化对象
+~~~java
+    //注明：使用默认构造器创建 空构造方法必须存在 否则创建失败
+    
+    //得到spring上下文环境，ApplicationContext接口代表Spring IOC容器，并负责实例化，配置和组装Bean
+    BeanFactory ac = new ClassPathXmlApplicationContext("spring.xml");
+    //得到被实例化的对象
+    UseService us = (UseService) ac.getBean("useService");
+    us.test1();
+~~~
+
+## 静态方法实例化
+
+~~~text
+当我们指定Spring使用静态工厂方法创建Bean对象时，Spring将先解析配置文件，并根据配置文件指定的信息，通过反射调用静态工厂类的静态工厂方法，并将该静态方法的返回值作为Bean实例。
+在这个过程中，Spring不再负责创建Bean实例，Bean实例是由用户提供的静态工厂方法提供的。
+~~~
 
 
+* 定义静态工厂类 StaticFactory.java
+~~~java
+public class StaticFactory {
 
+    /**
+     *@描述 定义静态方法，返回需要实例化的Bean对象
+     */
+    public static AccountService accountService(){
+        return new AccountService();
+    }
+}
+~~~
 
+* xml文件中，注明工厂实例化方法
+~~~xml
+    <!--静态工厂实例化 加载Bean对象-->
+    <bean id="accountService" class="com.zh.factory.StaticFactory" factory-method="accountService"/>
+~~~
+
+## 实例化工厂实例化
+
+* 区别
+~~~text
+工厂方法为非静态方法
+需要配置工厂bean，并在业务bean中配置factory-bean，factory-method属性
+~~~
+
+* 定义工厂类
+~~~java
+public class InstanceFactory {
+
+    public UseService useService(){
+        return new UseService();
+    }
+}
+~~~
+
+* xml文件实例化，以com.zh.factory.InstanceFactory为例
+~~~xml
+
+<!--定义实例化工厂bean，引用bean 指定工厂方法（方法为非静态）-->
+<bean id="instanceFactory" class="com.zh.factory.InstanceFactory"></bean>
+<bean id="useService" factory-bean="instanceFactory" factory-method="useService"></bean>
+~~~
 
 
 

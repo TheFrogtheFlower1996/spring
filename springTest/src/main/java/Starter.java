@@ -1,3 +1,5 @@
+import com.zh.factory.InstanceFactory;
+import com.zh.service.AccountService;
 import com.zh.service.UseService;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -15,8 +17,11 @@ public class Starter {
         BeanFactory ac = new ClassPathXmlApplicationContext("spring.xml");
 
         //得到被实例化的对象
+        AccountService as = (AccountService) ac.getBean("accountService");
+
         UseService us = (UseService) ac.getBean("useService");
 
+        as.test();
         us.test1();
     }
 

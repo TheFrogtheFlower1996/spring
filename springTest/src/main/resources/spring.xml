@@ -3,8 +3,13 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <bean id="useService" class="com.zh.service.UseService"></bean>
+<!--    <bean id="useService" class="com.zh.service.UseService"></bean>-->
 
+    <!--静态工厂实例化 加载Bean对象-->
+    <bean id="accountService" class="com.zh.factory.StaticFactory" factory-method="accountService"/>
 
+    <!--定义实例化工厂bean，引用bean 指定工厂方法（方法为非静态）-->
+    <bean id="instanceFactory" class="com.zh.factory.InstanceFactory"></bean>
+    <bean id="useService" factory-bean="instanceFactory" factory-method="useService"></bean>
 
 </beans>
