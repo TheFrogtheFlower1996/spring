@@ -51,7 +51,9 @@ Spring Web模块
 
 ~~~
 
-# Spring IOC容器 Bean对象实例化模拟实现
+# Bean对象实例化
+
+## bean对象实例化模拟实现
 * 定义工具类
 ~~~java
 public class UserDao {
@@ -223,36 +225,9 @@ public class Starter {
 }
 ~~~
 
-# Spring IOC加载配置文件
+## Bean对象实例化
 
-1. 通过相对路径加载配置文件
-~~~java
-BeanFactory ac = new ClassPathXmlApplicationContext("spring.xml");
-~~~
-
-2. 加载多个配置文件
-~~~java
-BeanFactory ac = new ClassPathXmlApplicationContext("spring.xml","beans.xml");
-~~~
-
-3，设置一个总配置文件，在总配置文件中导入要加载的配置文件
-
-总配置文件
-~~~xml
-<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
-
-    <!--总配置文件-->
-    <import resource="spring.xml"></import>
-    <import resource="beans.xml"></import>
-</beans>
-~~~
-
-# Spring IOC容器 Bean对象实例化
-
-## 构造器实例化
+### 构造器实例化
 
 * 设置配置文件 spring.xml
 ~~~xml
@@ -277,7 +252,7 @@ BeanFactory ac = new ClassPathXmlApplicationContext("spring.xml","beans.xml");
     us.test1();
 ~~~
 
-## 静态方法实例化
+### 静态方法实例化
 
 ~~~text
 当我们指定Spring使用静态工厂方法创建Bean对象时，Spring将先解析配置文件，并根据配置文件指定的信息，通过反射调用静态工厂类的静态工厂方法，并将该静态方法的返回值作为Bean实例。
@@ -304,7 +279,7 @@ public class StaticFactory {
     <bean id="accountService" class="com.zh.factory.StaticFactory" factory-method="accountService"/>
 ~~~
 
-## 实例化工厂实例化
+### 实例化工厂实例化
 
 * 区别
 ~~~text
@@ -329,6 +304,219 @@ public class InstanceFactory {
 <bean id="instanceFactory" class="com.zh.factory.InstanceFactory"></bean>
 <bean id="useService" factory-bean="instanceFactory" factory-method="useService"></bean>
 ~~~
+
+# 依赖注入 DI
+
+## 手动注入
+
+### set方法 注入bean对象
+
+* 定义TypeDao.java
+~~~java
+public class TypeDao {
+
+    public void test1() {
+        System.out.println("TypeDao...");
+    }
+}
+~~~
+
+* 定义TypeService.java，service层set方法 手动注入bean对象
+~~~java
+public class TypeService {
+
+    //bean对象
+    private TypeDao typeDao;
+
+    /**
+     * set方法注入，需要给属性字段提供set方法
+     * */
+    public void setTypeDao(TypeDao typeDao) {
+        this.typeDao = typeDao;
+    }
+
+    public void test() {
+        System.out.println("TypeService....业务类");
+        typeDao.test1();
+    }
+}
+~~~
+
+* 对应spring02.xml配置
+~~~xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="typeDao" class="com.zh.dao.TypeDao"/>
+    <bean id="typeService" class="com.zh.service.TypeService">
+        <!--set方法注入，通过property属性实现set方法注入-->
+        <property name="typeDao" ref="typeDao"/>
+    </bean>
+</beans>
+~~~
+
+### 构造函数 注入bean对象
+
+~~~text
+构造器注入存在循环依赖的问题（两个bean对象互相注入），最好使用set方法注入
+~~~
+
+* service类定义有参构造函数
+~~~java
+public class TypeService {
+
+    //bean对象
+    private TypeDao typeDao;
+
+    //构造器注入
+    public TypeService(TypeDao typeDao) {
+        this.typeDao = typeDao;
+    }
+    /**
+     * set方法注入，需要给属性字段提供set方法
+     * */
+    public void setTypeDao(TypeDao typeDao) {
+        this.typeDao = typeDao;
+    }
+    public void test() {
+        System.out.println("TypeService....业务类");
+        typeDao.test1();
+    }
+}
+~~~
+
+* xml配置文件的bean标签内添加 constructor-arg 构造函数标签
+~~~xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="typeDao" class="com.zh.dao.TypeDao"/>
+    
+    <bean id="typeService" class="com.zh.service.TypeService">
+        <!--构造函数注入bean对象-->
+        <constructor-arg name="typeDao" ref="typeDao"/>
+    </bean>
+</beans>
+~~~
+
+## 自动注入
+
+### @Resource
+
+* 注解方式注入bean
+~~~text
+对于bean的注入，除了使用xml配置外，可以使用注解配置。注解的配置，可以简化配置文件，提高开发速度，使程序看上去更加简洁。
+对于注解的解释，Spring对于注解的解释有专门的解释器，对定义的注解进行解析，实现对应bean对象的注入。通过反射技术实现。
+~~~
+
+* @Resource 实现bean对象自动注入
+~~~text
+默认会根据bean标签的id属性值查找（属性字段名与bean标签的属性值相同）
+如果属性名称未找到，会根据类型（class）查找
+如果注入的是接口，接口只有一个实现类时，能正常注入；如果接口有多个实现类，则需要使用name属性设置对应id值
+~~~
+
+UserDao01.java UserDao02.java 实现 IUserDao 接口
+
+* xml文件配置
+~~~xml
+<bean id="userDao01" class="com.zh.dao.UserDao01"/>
+<bean id="userDao02" class="com.zh.dao.UserDao02"/>
+~~~
+
+* service层配置
+~~~java
+@Resource(name = "userDao02")
+private IUserDao iUserDao;
+~~~
+
+### @Autowired
+
+~~~text
+默认通过类型（Class）查找Bean对象，与属性字段的名称无关
+属性可以提供set方法，也可以不提供set方法
+注解可以声明在属性级别或set方法级别
+可以添加 @Qualifier 结合使用，通过value属性值查找bean对象（value属性值必须设置，且值要与bean标签的id属性值对应）
+~~~
+
+* service层定义 bean对象别名
+~~~java
+    //bean对象
+    @Autowired
+    @Qualifier("td")
+    private TypeDao typeDao;
+~~~
+
+* xml文件配置
+~~~xml
+    <bean id="td" class="com.zh.dao.TypeDao"/>
+~~~
+
+# IOC扫描器（自动实例化）
+
+* 扫描器说明
+~~~text
+作用：bean对象统一进行管理，简化开发配置，提高开发效率
+
+1. 设置自动化扫描的范围
+    如果bean对象未在指定包范围，即使声明了注解，也无法实例化
+
+2. 使用指定的注解（声明在类级别）  bean对象的id属性默认是：类的首字母小写
+    DAO层：@Repository
+    Service层：@Service
+    Controller：@Controller
+    任意类：@Component
+~~~
+
+* 在xml配置 自动扫描IOC的bean对象
+~~~xml
+    <!--开启自动扫描，设置扫描包的范围-->
+    <context:component-scan base-package="com.zh"/>
+~~~
+
+#bean对象作用域和生命周期
+
+* bean对象的作用域
+~~~text
+单例作用域（singleton）
+    Spring容器在启动时会实例化bean对象，并将对象设置到单例缓存池中，下次获取时直接从缓存池中得到。
+    scope="singleton" 默认情况下，Spring容器中加载的bean对象都是单例。
+    
+    lazy-init属性，表示懒加载，默认为false。
+    如果为true，表示容器在启动时不会自动实例化Bean对象，而是在程序调用时才实例化Bean对象
+
+原型作用域（prototype）
+    Spring容器启动时会实例化bean对象，不会将对象设置到单例缓存池中，每次请求都会重新创建一个新的Bean对象。
+    scope="prototype"
+~~~
+
+* 原型作用域
+~~~xml
+    <!--原型作用域-->
+    <bean id="typeDao" class="com.zh.dao.TypeDao" scope="prototype" lazy-init="false"/>
+~~~
+
+* 解释
+
+~~~text
+为什么lazy-init属性默认为false?
+    1. 可以提前发现配置的潜在问题
+    2. Bean对象存在于缓存中，使用时不用再去实例化bean，加快程序运行效率
+
+什么对象适合做单例？
+    一般来说对于无状态或状态不可改变的对象适合做单例模式。（不存在会改变对象状态的成员变量）比如controller层、service层、dao层
+    
+什么是无状态或状态不可改变的对象？
+    对象中不存在改变当前对象的状态的成员变量。
+~~~
+
+
+
+
 
 
 
