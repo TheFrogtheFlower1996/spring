@@ -20,7 +20,7 @@ public class TypeService {
 
     public void test() {
         System.out.println("TypeService....业务类");
-        typeDao.test1();
+//        typeDao.test1();
     }
 
 }

@@ -34,7 +34,7 @@ DAO层
     Spring MVC
     Spring Security权限
     Quartz时钟框架（定时任务处理）
-    Elasticsearch搜索引擎
+    Elastic search 搜索引擎
 
 自带服务
     Mail邮件发送
@@ -48,13 +48,13 @@ Spring IOC模块：Bean对象的实例化，Bean的创建
 Spring AOP模块：面向切面编程，动态代理
 Spring JDBC + 事务模块
 Spring Web模块
-
 ~~~
 
-# Bean对象实例化
+# bean对象实例化
 
-## bean对象实例化模拟实现
-* 定义工具类
+## bean对象实例化 模拟
+
+* 定义工具类UserDao和测试方法test（）
 ~~~java
 public class UserDao {
     public void test(){
@@ -63,41 +63,33 @@ public class UserDao {
 }
 ~~~
 
-* 定义spring XML配置文件
+* 配置xml文件
 ~~~xml
 <?xml version="1.0" encoding="UTF-8"?>
 <beans >
-
     <bean id="userDao" clazz="com.zh.dao.UserDao"></bean>
     <bean id="userService" clazz="com.zh.service.UserService"></bean>
-
 </beans>
 ~~~
 
-* 定义MyBean实体类，用于存放id和class的值
+* 定义Bean实体类，存放id和class的值
 ~~~java
 /**
- * @author zh
- * @date 2022/3/25 11:34
  * @description: Bean属性对象，用来存放配置文件中的bean标签和class属性值
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class MyBean {
-
     private String id;
     private String clazz;
-
 }
-
 ~~~
 
-* 定义一个工厂接口 MyFactory 和一个抽象方法 getBean()
+* 定义一个工厂接口 BeanFactory 和抽象方法 getBean()
 ~~~java
 //工厂模式：自定义工具类
 public interface MyFactory {
-
     //通过id属性值获取实例化对象
     public Object getBean(String id);
 }
@@ -124,19 +116,18 @@ public class MyClassPathXmlApplication implements MyFactory{
 
     /**
      * 有参构造
-     * 1. 通过构造器的形参传递要解析的配置文件
+     * 1. 通过构造器的形参传递要解析的配置文件名
      *
      * */
     public MyClassPathXmlApplication(String fileName) {
 
-        /*解析配置文件*/
+        /*解析配置文件方法*/
         parseXml(fileName);
 
         /*得到实例化对象*/
         instanceBean();
     }
-
-
+    
     /**
      * 2. 解析配置文件，得到对应的bean标签的id与class的属性值，并设置到对应的bean对象中，存放到List集合
      *
@@ -221,7 +212,6 @@ public class Starter {
 
         us.test1();
     }
-
 }
 ~~~
 
@@ -453,7 +443,7 @@ private IUserDao iUserDao;
 
 * xml文件配置
 ~~~xml
-    <bean id="td" class="com.zh.dao.TypeDao"/>
+<bean id="td" class="com.zh.dao.TypeDao"/>
 ~~~
 
 # IOC扫描器（自动实例化）
@@ -480,39 +470,346 @@ private IUserDao iUserDao;
 
 #bean对象作用域和生命周期
 
-* bean对象的作用域
+## singleton 单例作用域
 ~~~text
-单例作用域（singleton）
-    Spring容器在启动时会实例化bean对象，并将对象设置到单例缓存池中，下次获取时直接从缓存池中得到。
-    scope="singleton" 默认情况下，Spring容器中加载的bean对象都是单例。
-    
-    lazy-init属性，表示懒加载，默认为false。
-    如果为true，表示容器在启动时不会自动实例化Bean对象，而是在程序调用时才实例化Bean对象
-
-原型作用域（prototype）
-    Spring容器启动时会实例化bean对象，不会将对象设置到单例缓存池中，每次请求都会重新创建一个新的Bean对象。
-    scope="prototype"
+默认情况下，Spring容器中加载Bean对象都是单例作用域。
+Spring容器在启动时会实例化bean对象，并将对象设置到单例缓存池中，下次获取时直接从缓存池中得到。
 ~~~
 
-* 原型作用域
 ~~~xml
-    <!--原型作用域-->
-    <bean id="typeDao" class="com.zh.dao.TypeDao" scope="prototype" lazy-init="false"/>
+<bean id="typeDao" class="com.zh.dao.TypeDao" scope="singleton" lazy-init="false"/>
+~~~
+
+![img_0.png](image/单例作用域.png)
+
+* 懒加载
+~~~text
+lazy-init属性，表示懒加载，默认为false，即Spring容器启动时实例化
+如果为true，表示容器在启动时不会自动实例化这个Bean对象，而是在程序调用时才会去实例化
+~~~
+
+* 验证懒加载
+~~~xml
+<!--
+添加init-method属性，当该bean对象被实例化时调用的方法
+
+lazy-init=“true” 开启懒加载
+-->
+
+<bean id="typeDao" class="com.zh.dao.TypeDao" scope="singleton" init-method="test1" lazy-init="true"/>
+~~~
+
+当bean对象typeDao被初始化时，init-method后面定义的方法就会被调用
+
+![img_0.png](image/懒加载.png)
+
+
+* lazy-init属性默认为false的好处?
+~~~text
+可以提前发现配置的潜在问题
+Bean对象存在于缓存中，使用时不用再去实例化bean，加快程序运行效率
+~~~
+
+* 什么对象适合做单例？
+~~~text
+一般来说对于无状态或状态不可改变的对象适合做单例模式。（不存在会改变对象状态的成员变量）比如controller层、service层、dao层
+~~~
+
+* 什么是无状态或状态不可改变的对象？
+~~~text
+对象中不存在改变当前对象的状态的成员变量。
+实际上对象状态的变化往往均是由于属性值的变化而引起的，比如User类 姓名属性会有变化，属性姓名的变化一般会引起user对象状态的变化。
+对于我们程序而言，无状态对象没有实例对象的存在，证明了线程的安全性，service层业务对象即是无状态对象，线程是安全的。
+~~~
+
+## prototype 原型作用域
+~~~text
+Spring容器启动时会实例化bean对象，不会将对象设置到单例缓存池中，每次请求都会重新创建一个新的Bean对象。
+~~~
+
+![img_0.png](image/原型作用域.png)
+
+~~~xml
+<!--原型作用域-->
+<bean id="typeDao" class="com.zh.dao.TypeDao" scope="prototype" lazy-init="false"/>
+~~~
+
+* 原型作用域，实例化两次bean对象，获得两个bean对象
+
+![img_0.png](image/原型实例化.png)
+
+
+## bean对象生命周期
+
+~~~text
+在Spring中，Bean的生命周期包括Bean的定义、初始化、调用、销毁 4个阶段
+~~~
+
+### bean初始化 方式一
+
+* 在bean标签配置 init-method属性 来指定初始化时调用的方法
+~~~java
+public class TypeDao {
+    //定义初始化时被调用的方法
+    public void test1() {
+        System.out.println("TypeDao...");
+    }
+}
+~~~
+
+* xml配置文件 bean标签
+~~~xml
+<!--通过init-method属性指定初始化方法-->
+<bean id="typeDao" class="com.zh.dao.TypeDao" scope="singleton" init-method="test1" lazy-init="true"/>
+~~~
+
+### bean初始化 方式二
+
+* 实现 import org.springframework.beans.factory.InitializingBean 接口
+
+~~~java
+public class TypeDao implements InitializingBean {
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        System.out.println("实现 InitializingBean 初始化Bean ，重写afterPropertiesSet方法，初始化Bean");
+    }
+}
+~~~
+
+### bean调用
+
+* BeanFactory 或 ApplicationContext
+~~~java
+//得到spring上下文环境
+BeanFactory beanFactory = new ClassPathXmlApplicationContext("spring04.xml");
+
+ApplicationContext applicationContext = new ClassPathXmlApplicationContext("spring04.xml");
+~~~
+
+* ApplicationContext 接口间接继承 BeanFactory
+
+![img_0.png](image/ApplicationContext-1.png)
+
+![img_0.png](image/ApplicationContext-2.png)
+
+### bean销毁
+
+* bean标签添加 destroy-method 属性，指定销毁方法
+~~~xml
+<!--bean对象销毁方法 destroy-method-->
+<bean id="typeDao" class="com.zh.dao.TypeDao" destroy-method="destroy"/>
+~~~
+
+* 通过 AbstractApplicationContext 接口，close方法销毁bean对象
+~~~java
+AbstractApplicationContext aac = new ClassPathXmlApplicationContext("spring04.xml");
+aac.close();
+~~~
+
+# spring Task 定时任务
+
+
+## xml
+
+* 定义定时任务类
+~~~java
+@Component //将该对象交给IOC容器进行实例化
+public class TaskJob {
+
+    public void job1(){
+        System.out.println("job1时间："+new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+    }
+
+    public void job2(){
+        System.out.println("job2时间："+new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+    }
+}
+~~~
+
+* 在beans标签添加Task规范
+~~~xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/task
+       http://www.springframework.org/schema/task/spring-task.xsd">
+
+    <!--开启自动扫描，设置扫描包的范围-->
+    <context:component-scan base-package="com.zh"/>
+
+    <!--定义定时任务-->
+        <task:scheduled-tasks>
+            <task:scheduled ref="taskJob" method="job1" cron="0/2 * * * * ?"/>
+            <task:scheduled ref="taskJob" method="job2" cron="0/5 * * * * ?"/>
+        </task:scheduled-tasks>
+</beans>
+~~~
+
+## @Scheduled
+
+* xml 开启定时任务驱动
+~~~xml
+<!--开启定时任务驱动，spring识别@Scheduled注解-->
+<task:annotation-driven/>
+~~~
+
+* 定义在定时类方法上
+~~~java
+@Component //将该对象交给IOC容器进行实例化
+public class TaskJob02 {
+
+    @Scheduled(cron="0/2 * * * * ?")
+    public void job1(){
+        System.out.println("job01时间："+new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+    }
+
+    @Scheduled(cron="0/5 * * * * ?")
+    public void job2(){
+        System.out.println("job02时间："+new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+    }
+}
+~~~
+
+
+# Spring AOP
+
+## 代理模式
+~~~text
+为某一个对象（委托类）提提供一个代理（代理类），用来控制这个对象的访问。委托类和代理类有一个共同的父类或父接口。代理类会对请求做预处理、过滤，将请求分配给指定对象
+
+代理模式在java开发中是一种比较常见的设计模式。设计目的旨在为服务类和客户类之间插入其他功能，插入的功能对于调用者是透明的，起到伪装控制的作用。
+如住房的例子：房客、中介、房东；对应于代理模式中即：客户类、代理类、委托类（类代理类）
+~~~
+
+* 代理模式设计原则
+~~~text
+代理类 和 委托类 具有相似的行为（共有）
+代理类 增强 委托类的行为
+~~~
+
+![img_0.png](image/代理模式.png)
+
+
+## 静态代理
+~~~text
+某个对象提供一个代理，代理角色固定，以控制对这个对象的访问。代理类和委托类有共同的父类或父接口，这样在任何使用委托类对象的地方都可以用代理对象替代。
+代理类负责请求的预处理、过滤，将请求分派给委托类处理、以及委托类执行完请求后的后续处理。
+~~~
+
+* 静态代理 父类或父接口
+~~~java
+public interface RentHouse {
+
+    public void toRentHouse();
+}
+~~~
+
+* 目标对象
+~~~java
+public class You implements RentHouse{
+    @Override
+    public void toRentHouse() {
+        System.out.println("目标对象，租到房子");
+    }
+}
+~~~
+
+* 代理对象
+~~~java
+// 1. 实现行为
+// 2. 增强目标对象行为
+public class AgencyProxy implements RentHouse{
+
+    //目标对象
+    private RentHouse rentHouse;
+    //有参构造函数，传入目标对象
+    public AgencyProxy(RentHouse rentHouse) {
+        this.rentHouse = rentHouse;
+    }
+
+    @Override
+    public void toRentHouse() {
+        System.out.println("中介找房");
+        rentHouse.toRentHouse();
+        System.out.println("中介收钱");
+    }
+}
+~~~
+
+* 测试类
+~~~java
+public class StarterProxy {
+    public static void main(String[] args) {
+
+        AgencyProxy proxy = new AgencyProxy(new You());
+        proxy.toRentHouse();
+    }
+}
+~~~
+
+* 测试结果
+  ![img_0.png](image/静态代理.png)
+
+## 动态代理
+
+~~~text
+相比于静态代理，动态代理在创建代理对象上更加灵活，动态代理类的字节码在程序运行时，由Java反射机制动态产生。
+它会根据需要，通过反射机制在程序运行期，动态的为目标对象创建代理对象，无需程序员手动编写源码。动态代理不仅简化了编程工作，
+而且提高了软件系统的可扩展性，因为反射机制可以生成任意类型的动态代理类。代理的行为可以代理多个方法，即满足产生需要的同时又达到代码通用的的目的。
+~~~
+
+* 动态代理特点
+~~~text
+1. 目标对象不固定
+2. 在应用程序执行时动态创建目标对象
+3. 代理对象会增强目标对象的行为
+~~~
+
+### JDK动态代理 
+
+* newProxyInstance
+
+~~~text
+Proxy类是专门完成代理的操作类，可以通过此类为一个或多个接口动态地生成实现类，此类提供了如下操作方法
+~~~
+
+~~~java
+public static Object newProxyInstance(ClassLoader loader,Class<?>[] interfaces,InvocationHandler h)
 ~~~
 
 * 解释
 
 ~~~text
-为什么lazy-init属性默认为false?
-    1. 可以提前发现配置的潜在问题
-    2. Bean对象存在于缓存中，使用时不用再去实例化bean，加快程序运行效率
-
-什么对象适合做单例？
-    一般来说对于无状态或状态不可改变的对象适合做单例模式。（不存在会改变对象状态的成员变量）比如controller层、service层、dao层
-    
-什么是无状态或状态不可改变的对象？
-    对象中不存在改变当前对象的状态的成员变量。
+返回一个指定接口的代理类的实例方法调用分派到指定的调用处理程序，（返回代理对象）
+    loader：一个ClassLoader对象，定义了由哪个ClassLoader对象来对生成的代理对象加载
+    interfaces：一个Interface对象的数组，表示的是我将要给我需要代理的对象提供一组什么接口，如果我提供了一组接口给它，
+        那么这个代理对象就宣称实现了该接口（多态），这样我就能调用这组接口中的方法
+    h：一个InvocationHandler接口，表示代理实例的调用处理程序实现的接口。每个代理实例都具有一个关联的调用处理程序。对代理实例调用方法时，
+        将对方法调用进行编码并将其指派到它的调用处理程序的 invoke 方法（传入InvocationHandler接口）
 ~~~
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

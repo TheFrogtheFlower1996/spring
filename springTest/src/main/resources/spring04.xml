@@ -3,7 +3,10 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
+<!--    <bean id="typeDao" class="com.zh.dao.TypeDao" scope="singleton" init-method="test1" lazy-init="true"/>-->
+<!--    <bean id="typeDao" class="com.zh.dao.TypeDao" lazy-init="true"/>-->
 
-    <!--原型作用域-->
-    <bean id="typeDao" class="com.zh.dao.TypeDao" scope="prototype" lazy-init="false"/>
+    <!--bean对象销毁方法 destroy-method-->
+    <bean id="typeDao" class="com.zh.dao.TypeDao" destroy-method="destroy"/>
+
 </beans>

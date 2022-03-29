@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/task
+       http://www.springframework.org/schema/task/spring-task.xsd">
+
+    <!--开启自动扫描，设置扫描包的范围-->
+    <context:component-scan base-package="com.zh"/>
+
+    <!--定义定时任务-->
+<!--    <task:scheduled-tasks>
+        <task:scheduled ref="taskJob" method="job1" cron="0/2 * * * * ?"/>
+        <task:scheduled ref="taskJob" method="job2" cron="0/5 * * * * ?"/>
+    </task:scheduled-tasks>-->
+
+    <!--开启定时任务驱动，spring识别@Scheduled注解-->
+    <task:annotation-driven/>
+
+</beans>
