@@ -52,9 +52,9 @@ Spring Web模块
 
 # bean对象实例化
 
-## bean对象实例化 模拟
+* bean对象实例化 模拟
 
-* 定义工具类UserDao和测试方法test（）
+* 定义测试类UserDao 测试方法test()
 ~~~java
 public class UserDao {
     public void test(){
@@ -63,16 +63,16 @@ public class UserDao {
 }
 ~~~
 
-* 配置xml文件
+* 定义UserDao的bean对象 userDao
 ~~~xml
 <?xml version="1.0" encoding="UTF-8"?>
-<beans >
+<beans>
     <bean id="userDao" clazz="com.zh.dao.UserDao"></bean>
     <bean id="userService" clazz="com.zh.service.UserService"></bean>
 </beans>
 ~~~
 
-* 定义Bean实体类，存放id和class的值
+* 定义Bean实体类，用于存放id和class属性
 ~~~java
 /**
  * @description: Bean属性对象，用来存放配置文件中的bean标签和class属性值
@@ -86,7 +86,7 @@ public class MyBean {
 }
 ~~~
 
-* 定义一个工厂接口 BeanFactory 和抽象方法 getBean()
+* 定义一个工厂接口 BeanFactory 和抽象方法 getBean()，用于获取bean的实例化对象
 ~~~java
 //工厂模式：自定义工具类
 public interface MyFactory {
@@ -95,7 +95,7 @@ public interface MyFactory {
 }
 ~~~
 
-* 定义工厂接口实现类MyClassPathXmlApplication，实现MyFactory工厂接口
+* 定义工厂接口实现类 MyClassPathXmlApplication，实现MyFactory工厂接口
 ~~~java
 /**
  * @author zh
@@ -201,10 +201,10 @@ public class MyClassPathXmlApplication implements MyFactory{
 
 * 实现类
 ~~~java
-public class Starter {
+public class com.zh.starter.Starter {
     public static void main(String[] args) {
 
-        //得到spring上下文环境，ApplicationContext接口代表Spring IOC容器，并负责实例化，配置和组装Bean
+        //得到spring上下文环境，ApplicationContext接口代表SpringIOC容器，负责实例化、配置和组装Bean
         BeanFactory ac = new ClassPathXmlApplicationContext("spring.xml");
 
         //得到被实例化的对象
@@ -215,45 +215,37 @@ public class Starter {
 }
 ~~~
 
-## Bean对象实例化
+## bean对象实例化 三种方式
 
-### 构造器实例化
+1. 构造器 方式一 
 
-* 设置配置文件 spring.xml
+* 配置bean标签，id表示需要实例化的bean对象id，class表示类路径
 ~~~xml
-<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+<bean id="useService" class="com.zh.service.UseService"></bean>
+~~~
 
-    <bean id="useService" class="com.zh.service.UseService"></bean>
-    
-</beans>
+~~~text
+注意：使用默认构造器创建时，空构造方法必须存在，否则创建失败
+得到spring上下文环境，ApplicationContext或BeanFactory接口代表SpringIOC容器，并负责实例化、配置和组装Bean
 ~~~
 
 * 获取实例化对象
 ~~~java
-    //注明：使用默认构造器创建 空构造方法必须存在 否则创建失败
-    
-    //得到spring上下文环境，ApplicationContext接口代表Spring IOC容器，并负责实例化，配置和组装Bean
-    BeanFactory ac = new ClassPathXmlApplicationContext("spring.xml");
-    //得到被实例化的对象
-    UseService us = (UseService) ac.getBean("useService");
-    us.test1();
+BeanFactory ac = new ClassPathXmlApplicationContext("spring.xml");
+UseService us = (UseService) ac.getBean("useService");
+us.test1();
 ~~~
 
-### 静态方法实例化
+2. 静态方法 方式二 了解
 
 ~~~text
 当我们指定Spring使用静态工厂方法创建Bean对象时，Spring将先解析配置文件，并根据配置文件指定的信息，通过反射调用静态工厂类的静态工厂方法，并将该静态方法的返回值作为Bean实例。
 在这个过程中，Spring不再负责创建Bean实例，Bean实例是由用户提供的静态工厂方法提供的。
 ~~~
 
-
-* 定义静态工厂类 StaticFactory.java
+* 定义静态工厂类，静态方法被 static 修饰，返回accountService实例化对象
 ~~~java
 public class StaticFactory {
-
     /**
      *@描述 定义静态方法，返回需要实例化的Bean对象
      */
@@ -263,24 +255,26 @@ public class StaticFactory {
 }
 ~~~
 
-* xml文件中，注明工厂实例化方法
+~~~text
+class：静态工具类路径
+factory-method：返回的bean实例化对象
+~~~
 ~~~xml
-    <!--静态工厂实例化 加载Bean对象-->
-    <bean id="accountService" class="com.zh.factory.StaticFactory" factory-method="accountService"/>
+<!--静态工厂实例化 加载Bean对象-->
+<bean id="accountService" class="com.zh.factory.StaticFactory" factory-method="accountService"/>
 ~~~
 
-### 实例化工厂实例化
+3. 实例化工厂 方式三 了解
 
-* 区别
+* 与静态工厂实例化区别
 ~~~text
 工厂方法为非静态方法
 需要配置工厂bean，并在业务bean中配置factory-bean，factory-method属性
 ~~~
 
-* 定义工厂类
+* 定义工厂类，返回bean实例化对象
 ~~~java
 public class InstanceFactory {
-
     public UseService useService(){
         return new UseService();
     }
@@ -288,6 +282,7 @@ public class InstanceFactory {
 ~~~
 
 * xml文件实例化，以com.zh.factory.InstanceFactory为例
+
 ~~~xml
 
 <!--定义实例化工厂bean，引用bean 指定工厂方法（方法为非静态）-->
@@ -297,9 +292,9 @@ public class InstanceFactory {
 
 # 依赖注入 DI
 
-## 手动注入
+* 手动注入
 
-### set方法 注入bean对象
+1. 手动注入方式一 set方法 注入bean对象
 
 * 定义TypeDao.java
 ~~~java
@@ -347,7 +342,7 @@ public class TypeService {
 </beans>
 ~~~
 
-### 构造函数 注入bean对象
+2. 手动注入方式二 构造函数 注入bean对象
 
 ~~~text
 构造器注入存在循环依赖的问题（两个bean对象互相注入），最好使用set方法注入
@@ -395,7 +390,7 @@ public class TypeService {
 
 ## 自动注入
 
-### @Resource
+## @Resource
 
 * 注解方式注入bean
 ~~~text
@@ -424,7 +419,7 @@ UserDao01.java UserDao02.java 实现 IUserDao 接口
 private IUserDao iUserDao;
 ~~~
 
-### @Autowired
+## @Autowired
 
 ~~~text
 默认通过类型（Class）查找Bean对象，与属性字段的名称无关
@@ -468,7 +463,7 @@ private IUserDao iUserDao;
     <context:component-scan base-package="com.zh"/>
 ~~~
 
-#bean对象作用域和生命周期
+#bean对象作用域
 
 ## singleton 单例作用域
 ~~~text
@@ -539,7 +534,7 @@ Spring容器启动时会实例化bean对象，不会将对象设置到单例缓�
 ![img_0.png](image/原型实例化.png)
 
 
-## bean对象生命周期
+# bean 生命周期
 
 ~~~text
 在Spring中，Bean的生命周期包括Bean的定义、初始化、调用、销毁 4个阶段
@@ -678,9 +673,9 @@ public class TaskJob02 {
 ~~~
 
 
-# Spring AOP
+# 动态代理
 
-## 代理模式
+* 代理模式
 ~~~text
 为某一个对象（委托类）提提供一个代理（代理类），用来控制这个对象的访问。委托类和代理类有一个共同的父类或父接口。代理类会对请求做预处理、过滤，将请求分配给指定对象
 
@@ -697,7 +692,7 @@ public class TaskJob02 {
 ![img_0.png](image/代理模式.png)
 
 
-## 静态代理
+1. 静态代理
 ~~~text
 某个对象提供一个代理，代理角色固定，以控制对这个对象的访问。代理类和委托类有共同的父类或父接口，这样在任何使用委托类对象的地方都可以用代理对象替代。
 代理类负责请求的预处理、过滤，将请求分派给委托类处理、以及委托类执行完请求后的后续处理。
@@ -745,7 +740,7 @@ public class AgencyProxy implements RentHouse{
 
 * 测试类
 ~~~java
-public class StarterProxy {
+public class com.zh.starter.StarterProxy {
     public static void main(String[] args) {
 
         AgencyProxy proxy = new AgencyProxy(new You());
@@ -757,7 +752,7 @@ public class StarterProxy {
 * 测试结果
   ![img_0.png](image/静态代理.png)
 
-## 动态代理
+2. 动态代理
 
 ~~~text
 相比于静态代理，动态代理在创建代理对象上更加灵活，动态代理类的字节码在程序运行时，由Java反射机制动态产生。
@@ -772,7 +767,10 @@ public class StarterProxy {
 3. 代理对象会增强目标对象的行为
 ~~~
 
-### JDK动态代理 
+## JDK动态代理 
+~~~text
+需要使用JDK动态代理的类，必须要有接口实现
+~~~
 
 * newProxyInstance
 
@@ -784,35 +782,415 @@ Proxy类是专门完成代理的操作类，可以通过此类为一个或多个
 public static Object newProxyInstance(ClassLoader loader,Class<?>[] interfaces,InvocationHandler h)
 ~~~
 
-* 解释
+* 理解
 
 ~~~text
 返回一个指定接口的代理类的实例方法调用分派到指定的调用处理程序，（返回代理对象）
+
     loader：一个ClassLoader对象，定义了由哪个ClassLoader对象来对生成的代理对象加载
+    
     interfaces：一个Interface对象的数组，表示的是我将要给我需要代理的对象提供一组什么接口，如果我提供了一组接口给它，
         那么这个代理对象就宣称实现了该接口（多态），这样我就能调用这组接口中的方法
+        
     h：一个InvocationHandler接口，表示代理实例的调用处理程序实现的接口。每个代理实例都具有一个关联的调用处理程序。对代理实例调用方法时，
         将对方法调用进行编码并将其指派到它的调用处理程序的 invoke 方法（传入InvocationHandler接口）
 ~~~
 
 
+1. 定义RentHouse接口和两个抽象方法
+~~~java
+public interface RentHouse {
+
+    public void toRentHouse();
+
+    public String toRentHouse2(String name);
+}
+~~~
+
+2. 定义目标类You，实现接口，重写方法
+~~~java
+public class You implements RentHouse{
+    @Override
+    public void toRentHouse() {
+        System.out.println("目标对象，租到房子");
+    }
+
+    @Override
+    public String toRentHouse2(String name) {
+        System.out.println(name+"目标对象，租到房子");
+
+        return "result01";
+    }
+}
+~~~
+
+3. 定义JDK动态代理类
+~~~java
+public class JdkDynamicProxy {
+
+    //目标对象
+    private Object target;
+    //带参构造传递目标对象
+    public JdkDynamicProxy(Object target) {
+        this.target = target;
+    }
+
+    /**
+     * 得到代理对象
+     * */
+    public Object getProxy(){
+        Object object = null;
+        /**
+         * 通过调用Proxy代理类中的静态方法 newProxyInstance()，得到代理对象
+         * */
+
+        //定义了由哪个ClassLoader对象来生成的代理对象进行加载
+        ClassLoader classLoader = this.getClass().getClassLoader();
+        //要代理的对象提供一组什么接口
+        Class[] interfaces = target.getClass().getInterfaces();
+        //一个InvocationHandler接口，表示代理实例的调用处理程序实现的接口
+        InvocationHandler invocationHandler = new InvocationHandler() {
+            /**
+             * 当代理对象被调用时 invoke方法会被调用一次
+             * proxy 代理对象
+             * method 目标对象方法
+             * args 目标方法需要的参数
+             * */
+            @Override
+            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                System.out.println(method.getName());//toRentHouse
+                System.out.println(args.length);
+                System.out.println(args[0]);
+                System.out.println("invoke...调用");
+
+                /**
+                 * 反射 invoke方法 调用目标对象方法
+                 *  方法名.invoke(对象,方法需所需参数)
+                 * */
+                Object result = method.invoke(target, args);
+
+                System.out.println("result："+result);
+                return result;
+            }
+        };
+
+        //调用方法，得到代理对象
+        object = Proxy.newProxyInstance(classLoader, interfaces, invocationHandler);
+
+        return object;
+    }
+}
+~~~
+
+4. 测试类
+~~~java
+public class com.zh.starter.StarterJdkDynamicProxy {
+    public static void main(String[] args) {
+
+/*        //目标对象
+        RentHouse target = new You();
+        //代理类
+        JdkDynamicProxy jdkDynamicProxy = new JdkDynamicProxy(target);
+        //得到代理对象
+        RentHouse object = (RentHouse) jdkDynamicProxy.getProxy();
+
+        object.toRentHouse();*/
+
+        //目标对象有返回值
+        RentHouse target2 = new You();
+        //动态代理类对象
+        JdkDynamicProxy jdkDynamicProxy2 = new JdkDynamicProxy(target2);
+        //得到代理对象
+        RentHouse object2 = (RentHouse) jdkDynamicProxy2.getProxy();
+        //代理对象调用
+        object2.toRentHouse2("张三");
+
+    }
+~~~
+
+5. 结果
+
+![img_0.png](image/JDK动态代理测试.png)
+
+## CGLIB 动态代理
+
+~~~text
+继承思想，代理类是目标类的子类，代理类对目标类中的方法进行重写
+
+JDK的动态代理机制只能代理实现了接口的类，而不能实现接口的类就不能使用JDK的动态代理，CGLIB是针对类来实现代理的，
+它的原理是对指定的目标类生成一个子类，并覆盖其中方法实现增强，但因为采用的是继承，所以不能对final修饰的类进行代理。
+~~~
+
+1. 定义没有接口实现的目标类
+~~~java
+public class User {
+
+    public void toMarry(){
+        System.out.println("结婚了");
+    }
+}
+~~~
+
+2. 定义CglibDynamicProxy 动态代理类
+~~~java
+public class CglibProxy {
+
+    //目标对象
+    private Object target;
+
+    //通过带参构造器 获取目标对象
+    public CglibProxy(Object target) {
+        this.target = target;
+    }
+
+    /**
+     * 获取代理对象
+     *
+     * */
+    public Object getProxy(){
+        //通过Enhancer对象的create()方法可以生成一个类，用于生成代理对象
+        Enhancer enhancer = new Enhancer();
+        //设置当前类的父类（将目标类作为代理类父类）
+        enhancer.setSuperclass(target.getClass());
+        //定义 方法拦截器
+        MethodInterceptor interceptor = new MethodInterceptor() {
+            /**
+             * 代理过程 当代理对象调用方法时 intercept()方法会被执行
+             * o 由CGLIB动态生成的代理类实例
+             * method 目标方法
+             * objects 方法所需要的参数
+             * methodProxy 代理对象对方法的引用
+             * */
+            @Override
+            public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable {
+                System.out.println("CGLIB...指定方法执行前");
+                Object result = method.invoke(target, objects);
+                System.out.println("CGLIB...指定方法执行后");
+                return result;
+            }
+        };
+
+        //设置拦截过程（调用目标对象的方法、增强用户行为）
+        enhancer.setCallback(interceptor);
+
+        //生成一个类
+        return enhancer.create();
+    }
+}
+~~~
+
+3. 测试
+~~~java
+public class CglibTest {
+    public static void main(String[] args) {
+        
+        //目标对象
+        User user = new User();
+        //代理类
+        CglibProxy cglibProxy1 = new CglibProxy(user);
+        //代理对象
+        User user1 = (User) cglibProxy1.getProxy();
+        //调用
+        user1.toMarry();
+    }
+}
+~~~
+
+4. 测试结果 
+
+![img_0.png](image/Cglib动态代理测试.png)
 
 
+# Spring AOP
+
+* 什么是AOP
+~~~text
+面向切面编程，相比较oop面向对象编程来说，AOP关注的不再是程序代码中某个类，某些方法，而aop考虑的更多是一种面到面的切入，
+即层与层之间的一种切入，所以称为切面。
+~~~
+
+* AOP能做什么
+~~~text
+AOP主要应用于日志记录、性能统计、安全控制、事务处理等方面，实现公共功能性的重复使用
+~~~
+
+* AOP的特点
+~~~text
+1. 降低模块与模块之间的耦合度，提高业务代码的聚合度。（高内聚低耦合）
+2. 提高代码的复用性
+3. 提高系统的扩展性。（高版本兼容低版本）
+4. 可以在不影响原有的功能基础上添加新的功能
+~~~
+
+* AOP底层和实现
+~~~text
+动态代理（JDK+CGLIB）
+~~~
+
+## AOP基本概念
+
+* Joinpoint 连接点
+~~~text
+被拦截的每个点，spring中指被拦截到的每一个方法，spring aop一个连接点即代表一个方法的执行
+~~~
+
+* Pointcut 切入点
+~~~text
+对连接点进行拦截的定义（匹配规则定义 规定拦截哪些方法，对哪些方法进行处理），spring有专门的表达式语言定义
+~~~
+
+* Advice 通知
+~~~text
+拦截到每个连接点即（每个方法）后所要做的操作
+
+1. 前置通知 （前置增强）  before()    执行方法前通知
+2. 返回通知（返回增强）   afterReturn()   方法正常结束返回后的通知
+3. 异常抛出通知（异常抛出增强）   afterThrow()
+4. 最终通知     after()     无论方法是否发生异常，均会执行该通知
+5. 环绕通知     round()     包围一个连接点（join point）的通知，如方法调用。这是最强大的一种通知类型。环绕通知可以在方法调用前后完成自定义的行为。
+                           它也会选择是否继续执行连接点或直接返回它们自己的返回值或抛出异常来结束执行。
+~~~
+
+* Aspect 切面
+~~~text
+切入点与通知的结合，决定了切面的定义，切入点定义了要拦截哪些类的哪些方法，通知则定义了拦截过方法后要做什么，切面则是横切关注点的抽象，
+与类相似，类是对物体特征的抽象，切面则是横切关注点抽象。
+~~~
+
+* Target 目标对象
+~~~text
+被代理的目标对象
+~~~
+
+* Weave 织入
+~~~text
+将切面应用到目标对象并生成代理对象的这个过程即为织入
+~~~
+
+* Introduction 引入
+~~~text
+在不修改原有应用程序代码的情况下，在程序运行期为类动态添加方法或者字段的过程称为 引入
+~~~
+
+## AOP实现
+
+* 注解方法实现 
+
+1. 添加AOP依赖
+~~~xml
+<dependency>
+  <groupId>org.aspectj</groupId>
+  <artifactId>aspectjweaver</artifactId>
+  <version>1.9.5</version>
+</dependency>
+~~~
+
+2. xml配置文件中添加 aop相关命名空间，包括开启AOP自动代理注解
+~~~xml
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+  <!--开启自动扫描，设置扫描包的范围-->
+  <context:component-scan base-package="com.zh"/>
+
+  <!--注解实现：AOP自动代理-->
+  <aop:aspectj-autoproxy/>
+  
+</beans>
+~~~
+
+3. 定义一个日志切面类，用于监控AddService类
+~~~java
+/**
+ * 切面是切入点与通知的结合
+ *     切入点：定义规则，定义切面要拦截哪些类哪些方法
+ *     通知：方法拦截后要做什么事情
+ * */
+@Component //将类交给IOC容器实例化
+@Aspect //声明当前类是一个切面类
+public class LogCut {
 
 
+    /**
+     * 定义切入点，通过 @Pointcut()注解 定义规则
+     * 注：规则表达式的第一个位置表示方法的修饰范围
+     *
+     * 1.拦截所有的方法
+     *     @Pointcut("execution(* *(..))")
+     * 2.拦截所有共有的set方法
+     *     @Pointcut("execution(public set*(..))")
+     * 3.拦截 com.zh.service 包及其子包下面的所有类和所有方法
+     *     @Pointcut("execution(* com.zh.service..*.*(..))")
+     * 4.拦截 com.zh.service 包下面的所有类和所有方法
+     *     @Pointcut("execution(* com.zh.service.*.*(..))")
+     * */
+    @Pointcut("execution(* com.zh.service.*.*(..))")
+    public void cut(){
+        System.out.println("cut...切面方法");
+    }
 
+    /**
+     * 前置通知，应用在指定切点上，在目标方法执行前执行
+     *
+     * */
+    @Before("cut()")
+    public void before(){
+//        System.out.println("前置通知...before");
+    }
 
+    /**
+     * 返回通知，应用在指定切点上，在目标方法（无异常）返回后执行
+     * */
+    @AfterReturning("cut()")
+    public void afterReturn(){
+//        System.out.println("后置通知...afterReturn");
+    }
 
+    /**
+     * 最终通知
+     * */
+    @After("cut()")
+    public void after(){
+//        System.out.println("最终通知...after");
+    }
 
+    @AfterThrowing(value = "cut()",throwing = "e")
+    public void afterThrow(Exception e){
+//        System.out.println("异常通知，原因："+e.getMessage());
+    }
 
+    /**
+     * 环绕通知，需要显式调用对应的方法，否则无法指定方法（pjp.proceed()）
+     *
+     * */
+    @Around("cut()")
+    public Object around(ProceedingJoinPoint pjp){
 
+        System.out.println("前置通知");
+        Object result = null;
 
+        try {
+            result = pjp.proceed();
+            System.out.println(pjp.getTarget());
+            System.out.println(pjp.getSignature());
+            System.out.println("返回通知");
+        } catch (Exception e){
+            System.out.println("异常通知..."+e.getMessage());
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        } finally {
+            System.out.println("最终通知");
+        }
 
-
-
-
-
-
+        return result;
+    }
+}
+~~~
 
 
 
