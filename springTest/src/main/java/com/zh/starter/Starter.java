@@ -1,3 +1,5 @@
+package com.zh.starter;
+
 import com.zh.factory.InstanceFactory;
 import com.zh.service.AccountService;
 import com.zh.service.UseService;

@@ -1,3 +1,5 @@
+package com.zh.starter;
+
 import com.zh.dao.IUserDao;
 import com.zh.service.UseService;
 import org.springframework.beans.factory.BeanFactory;

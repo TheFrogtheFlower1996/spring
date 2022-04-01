@@ -8,4 +8,6 @@ package com.zh.statics;
 public interface RentHouse {
 
     public void toRentHouse();
+
+    public String toRentHouse2(String name);
 }

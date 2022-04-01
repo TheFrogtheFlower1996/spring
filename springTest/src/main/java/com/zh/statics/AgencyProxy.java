@@ -22,4 +22,9 @@ public class AgencyProxy implements RentHouse{
         rentHouse.toRentHouse();
         System.out.println("中介收钱");
     }
+
+    @Override
+    public String toRentHouse2(String name) {
+        return "as";
+    }
 }

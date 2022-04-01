@@ -1,3 +1,5 @@
+package com.zh.starter;
+
 import com.zh.service.TypeService;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;

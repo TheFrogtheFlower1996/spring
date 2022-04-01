@@ -1,3 +1,5 @@
+package com.zh.starter;
+
 import com.zh.controller.TestController;
 import com.zh.dao.TypeDao;
 import org.springframework.beans.factory.BeanFactory;

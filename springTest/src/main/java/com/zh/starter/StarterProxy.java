@@ -1,3 +1,5 @@
+package com.zh.starter;
+
 import com.zh.statics.AgencyProxy;
 import com.zh.statics.RentHouse;
 import com.zh.statics.You;
@@ -12,6 +14,8 @@ public class StarterProxy {
 
         AgencyProxy proxy = new AgencyProxy(new You());
         proxy.toRentHouse();
+
+
 
     }
 }
