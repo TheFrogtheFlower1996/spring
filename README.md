@@ -441,7 +441,7 @@ private IUserDao iUserDao;
 <bean id="td" class="com.zh.dao.TypeDao"/>
 ~~~
 
-# IOC扫描器（自动实例化）
+## IOC扫描器（自动实例化）
 
 * 扫描器说明
 ~~~text
@@ -463,7 +463,7 @@ private IUserDao iUserDao;
     <context:component-scan base-package="com.zh"/>
 ~~~
 
-#bean对象作用域
+# bean对象作用域
 
 ## singleton 单例作用域
 ~~~text
@@ -534,7 +534,7 @@ Spring容器启动时会实例化bean对象，不会将对象设置到单例缓�
 ![img_0.png](image/原型实例化.png)
 
 
-# bean 生命周期
+# bean对象生命周期
 
 ~~~text
 在Spring中，Bean的生命周期包括Bean的定义、初始化、调用、销毁 4个阶段
@@ -750,7 +750,8 @@ public class com.zh.starter.StarterProxy {
 ~~~
 
 * 测试结果
-  ![img_0.png](image/静态代理.png)
+  
+![img_0.png](image/静态代理.png)
 
 2. 动态代理
 
@@ -1191,6 +1192,14 @@ public class LogCut {
     }
 }
 ~~~
+
+# spring 集成 mybatis
+
+
+
+
+
+
 
 
 
