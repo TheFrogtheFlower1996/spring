@@ -40,6 +40,16 @@ Spring MVC 框架也是基于请求驱动的Web框架，并且使用前端控制
 11. 最终前端控制器将渲染后的页面响应给用户或客户端
 ~~~
 
+~~~text
+1. 请求被 前端控制器（DispatherServlet） 捕获
+
+2. 调用处理器映射器(HandlerMapper)，对请求URL进行解析，此时返回Handler对象和一个处理器拦截器（HandlerInterceptor）
+
+3. 调用处理器适配器（HandlerAdapter），解析返回的Handler对象，调用对象的处理器（Controller中的方法），返回一个ModelAndView
+
+4. 调用视图解析器（ViewResolver），返回对应视图，然后渲染视图
+~~~
+
 # 搭建流程
 
 * 文件格式
@@ -126,7 +136,7 @@ Spring MVC 框架也是基于请求驱动的Web框架，并且使用前端控制
 </beans>
 ~~~
 
-# URL映射地址
+# URL映射地址：@RequestMapping()
 
 * @RequestMapping()
 
@@ -204,7 +214,7 @@ public class UrlController {
 }
 ~~~
 
-# 参数绑定
+# 参数绑定：@RequestParam
 
 ~~~java
 /**
@@ -279,12 +289,12 @@ public class ParamsController {
 }
 ~~~
 
-# 请求转发和重定向
+# forward 和 redirect
 
 ~~~text
 请求转发：
 
-1. 地址不发生改变，以forward：开头
+1. 地址不发生改变，以 forward 开头
 2. 请求转发到页面或者控制器
 3. 方法有两种返回方式：
 
@@ -295,7 +305,7 @@ public class ParamsController {
 
 重定向：
 
-1.地址发生改变，以 redirect：开头
+1.地址发生改变，以 redirect 开头
     ...
 
 注： 默认会从根目录（webapp）下查找视图
@@ -396,7 +406,7 @@ public class JumpController {
 }
 ~~~
 
-# 设置请求域
+# 请求域：ModelAndView
 
 * 五种请求域方式
 ~~~text
@@ -445,7 +455,7 @@ public class DataController {
 }
 ~~~
 
-# 传递JSON 
+# 传递JSON：@ResponseBody
 
 ~~~text
  @ResponseBody
@@ -517,7 +527,7 @@ public class JsonController {
 </html>
 ~~~
 
-# 拦截器
+# 拦截器：HandlerInterceptor.preHandle
 
 ~~~text
 SpringMVC中的 Interceptor 拦截器也是相当重要和有用的，它的主要作用是 拦截用户的请求并进行相应处理。比如通过它来进行
@@ -656,6 +666,121 @@ public class UserController {
     }
 }
 ~~~
+
+# RESTFUL 
+
+~~~text
+Restful 风格的API是一种软件架构风格，设计风格不是标准，只是提供了一组设计原则和约束条件。
+基于这个风格设计的软件更简洁，更有层次，更容易实现缓存机制等
+
+Restful 不存在任何动作行为
+~~~
+
+* 请求方法
+~~~text
+GET     @GetMapper("路径")
+POST    @PostMapper("路径")
+UPDATE  @UpdateMapper("路径")
+DELETE  @DeleteMapper("")
+~~~
+
+* 请求参数
+~~~text
+路径参数：
+    在请求方法中用{}设置参数名，在方法参数中用 @PathVariable 映射该参数
+    
+JSON格式：
+    用 @RequestBody 注解声明形参，表示接收一个JSON格式参数
+~~~
+
+* 响应参数
+~~~text
+响应JSON格式参数
+    在方法前声明 @ResponseBody 注解，表示该方法返回JSON格式数据
+~~~
+
+# 全局异常
+
+* 三种处理异常方式
+~~~text
+1.使用SpringMVC提供的 简单异常处理器 SimpleMappingExceptionResolver
+2.实现Spring的异常处理接口 HandlerExceptionResolver 自定义自己的异常处理类
+3.使用 @ExceptionHandler 注解实现异常处理
+~~~
+
+##简单异常处理器 SimpleMappingExceptionResolver
+
+* xml配置定义简单异常处理器
+~~~xml
+<!--简单异常处理器-->
+<bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+    <!--页面跳转出现异常，设置默认的错误页面-->
+    <property name="defaultErrorView" value="error"/>
+    <!--默认异常 跳转到ex页面-->
+    <property name="exceptionAttribute" value="ex"/>
+    <!--自定义异常与页面映射-->
+    <property name="exceptionMappings">
+        <props>
+            <prop key="com.zh.springmvc.exceptions.ParamsException">params_error</prop>
+            <prop key="com.zh.springmvc.exceptions.BusinessException">business_error</prop>
+        </props>
+    </property>
+</bean>
+~~~
+
+## 实现 HandlerExceptionResolver 解析器
+
+~~~text
+使用 HandlerExceptionResolver 接口的异常处理器进行异常处理，具有集成简单、良好的扩展性、对已有代码没有入侵性等优点，
+同时，在异常处理获取导致出现异常的对象，有利于更详细的异常处理信息。
+~~~
+
+* xml配置全局统一异常bean
+
+~~~xml
+<!--全局异常捕捉 实现 HandlerExceptionResolver 解析器-->
+<bean class="com.zh.springmvc.GlobalExceptionResolver" />
+~~~
+
+~~~java
+/**
+ * @author zh
+ * @date 2022/4/14 14:21
+ * @description:说明 全局统一异常 实现 HandlerExceptionResolver 解析器接口
+ */
+@Component
+public class GlobalExceptionResolver implements HandlerExceptionResolver {
+    @Override
+    public ModelAndView resolveException(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, Exception e) {
+
+        ModelAndView mv = new ModelAndView("error");
+        mv.addObject("ex","全局统一异常");
+
+        //判断是否是自定义异常
+        if (e instanceof ParamsException){
+            mv.setViewName("params_error");
+            ParamsException pe = (ParamsException) e;
+            mv.addObject("pe",pe.getMsg());
+        }
+        if (e instanceof BusinessException){
+            mv.setViewName("business_error");
+            BusinessException pe = (BusinessException) e;
+            mv.addObject("pe",pe.getMsg());
+        }
+        
+        // .....
+
+        return mv;
+    }
+}
+~~~
+
+## @ExceptionHandler
+
+## 未捕获异常处理
+
+![img_0.png](imageSpringMVC/未捕获异常处理.png)
+
 
 
 

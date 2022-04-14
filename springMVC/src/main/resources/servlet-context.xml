@@ -14,7 +14,7 @@
     <!--开启自动扫描，设置扫描包的范围-->
     <context:component-scan base-package="com.zh.springmvc.controller"/>
 
-    <!--使用默认的 Servlet 响应静态文件-->
+        <!--使用默认的 Servlet 响应静态文件-->
     <mvc:default-servlet-handler/>
 
     <!--开启注解驱动-->
@@ -44,5 +44,23 @@
         <!--后缀：以.jsp结尾-->
         <property name="suffix" value=".jsp"/>
     </bean>
+
+    <!--简单异常处理器-->
+<!--    <bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+        页面跳转出现异常，设置默认的错误页面
+        <property name="defaultErrorView" value="error"/>
+        默认异常 信息
+        <property name="exceptionAttribute" value="ex"/>
+        自定义异常与页面映射
+        <property name="exceptionMappings">
+            <props>
+                <prop key="com.zh.springmvc.exceptions.ParamsException">params_error</prop>
+                <prop key="com.zh.springmvc.exceptions.BusinessException">business_error</prop>
+            </props>
+        </property>
+    </bean>-->
+
+    <!--全局异常捕捉 实现 HandlerExceptionResolver 解析器-->
+    <bean class="com.zh.springmvc.GlobalExceptionResolver" />
 
 </beans>

@@ -1,8 +1,12 @@
 package com.zh.springmvc.controller;
 
+import com.zh.springmvc.exceptions.BusinessException;
+import com.zh.springmvc.exceptions.ParamsException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
+
+import java.text.ParseException;
 
 /**
  * @author zh
@@ -18,6 +22,14 @@ public class HelloController {
      * */
     @RequestMapping("hello")
     public ModelAndView hello(){
+
+//        int i = 1 / 0;
+
+        //自定义参数异常
+        if (true){
+//            throw new BusinessException();
+            throw new ParamsException();
+        }
 
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.addObject("msg","hello spring mvc");
