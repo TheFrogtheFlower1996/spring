@@ -52,7 +52,7 @@ Spring Web模块
 
 # bean对象实例化
 
-* bean对象实例化 模拟
+## bean对象实例化 模拟
 
 * 定义测试类UserDao 测试方法test()
 ~~~java
@@ -217,16 +217,17 @@ public class com.zh.starter.Starter {
 
 ## bean对象实例化 三种方式
 
-1. 构造器 方式一 
-
-* 配置bean标签，id表示需要实例化的bean对象id，class表示类路径
-~~~xml
-<bean id="useService" class="com.zh.service.UseService"></bean>
-~~~
+### 默认无参构造器 方式一 
 
 ~~~text
-注意：使用默认构造器创建时，空构造方法必须存在，否则创建失败
-得到spring上下文环境，ApplicationContext或BeanFactory接口代表SpringIOC容器，并负责实例化、配置和组装Bean
+在xml配置文件中，配置bean标签，id表示需要实例化的bean对象id，class表示类路径
+
+注意：使用默认无参构造器创建时，空构造方法必须存在，否则创建失败
+得到spring上下文环境，ApplicationContext 或 BeanFactory接口代表SpringIOC容器，并负责实例化、配置和组装Bean
+~~~
+
+~~~xml
+<bean id="useService" class="com.zh.service.UseService"></bean>
 ~~~
 
 * 获取实例化对象
@@ -236,7 +237,10 @@ UseService us = (UseService) ac.getBean("useService");
 us.test1();
 ~~~
 
-2. 静态方法 方式二 了解
+
+
+
+### 静态方法 方式二 了解
 
 ~~~text
 当我们指定Spring使用静态工厂方法创建Bean对象时，Spring将先解析配置文件，并根据配置文件指定的信息，通过反射调用静态工厂类的静态工厂方法，并将该静态方法的返回值作为Bean实例。
@@ -264,7 +268,7 @@ factory-method：返回的bean实例化对象
 <bean id="accountService" class="com.zh.factory.StaticFactory" factory-method="accountService"/>
 ~~~
 
-3. 实例化工厂 方式三 了解
+### 实例化工厂 方式三 了解
 
 * 与静态工厂实例化区别
 ~~~text
@@ -292,9 +296,9 @@ public class InstanceFactory {
 
 # 依赖注入 DI
 
-* 手动注入
+## 手动注入
 
-1. 手动注入方式一 set方法 注入bean对象
+### set方法注入
 
 * 定义TypeDao.java
 ~~~java
@@ -342,7 +346,7 @@ public class TypeService {
 </beans>
 ~~~
 
-2. 手动注入方式二 构造函数 注入bean对象
+### 构造函数注入
 
 ~~~text
 构造器注入存在循环依赖的问题（两个bean对象互相注入），最好使用set方法注入
@@ -390,7 +394,7 @@ public class TypeService {
 
 ## 自动注入
 
-## @Resource
+### @Resource
 
 * 注解方式注入bean
 ~~~text
@@ -405,9 +409,9 @@ public class TypeService {
 如果注入的是接口，接口只有一个实现类时，能正常注入；如果接口有多个实现类，则需要使用name属性设置对应id值
 ~~~
 
-UserDao01.java UserDao02.java 实现 IUserDao 接口
 
-* xml文件配置
+
+* xml文件配置（UserDao01.java，UserDao02.java 实现 IUserDao 接口）
 ~~~xml
 <bean id="userDao01" class="com.zh.dao.UserDao01"/>
 <bean id="userDao02" class="com.zh.dao.UserDao02"/>
@@ -419,7 +423,7 @@ UserDao01.java UserDao02.java 实现 IUserDao 接口
 private IUserDao iUserDao;
 ~~~
 
-## @Autowired
+### @Autowired
 
 ~~~text
 默认通过类型（Class）查找Bean对象，与属性字段的名称无关
@@ -692,13 +696,14 @@ public class TaskJob02 {
 ![img_0.png](image/代理模式.png)
 
 
-1. 静态代理
+## 静态代理
+
 ~~~text
 某个对象提供一个代理，代理角色固定，以控制对这个对象的访问。代理类和委托类有共同的父类或父接口，这样在任何使用委托类对象的地方都可以用代理对象替代。
 代理类负责请求的预处理、过滤，将请求分派给委托类处理、以及委托类执行完请求后的后续处理。
 ~~~
 
-* 静态代理 父类或父接口
+* 静态代理 提供父类或父接口
 ~~~java
 public interface RentHouse {
 
@@ -706,7 +711,7 @@ public interface RentHouse {
 }
 ~~~
 
-* 目标对象
+* 目标类
 ~~~java
 public class You implements RentHouse{
     @Override
@@ -716,10 +721,12 @@ public class You implements RentHouse{
 }
 ~~~
 
-* 代理对象
+* 代理类
 ~~~java
-// 1. 实现行为
-// 2. 增强目标对象行为
+/**
+ * 1. 实现行为
+ * 2. 增强目标对象行为
+ * */
 public class AgencyProxy implements RentHouse{
 
     //目标对象
@@ -742,7 +749,6 @@ public class AgencyProxy implements RentHouse{
 ~~~java
 public class com.zh.starter.StarterProxy {
     public static void main(String[] args) {
-
         AgencyProxy proxy = new AgencyProxy(new You());
         proxy.toRentHouse();
     }
@@ -753,7 +759,7 @@ public class com.zh.starter.StarterProxy {
   
 ![img_0.png](image/静态代理.png)
 
-2. 动态代理
+## 动态代理
 
 ~~~text
 相比于静态代理，动态代理在创建代理对象上更加灵活，动态代理类的字节码在程序运行时，由Java反射机制动态产生。
@@ -768,7 +774,8 @@ public class com.zh.starter.StarterProxy {
 3. 代理对象会增强目标对象的行为
 ~~~
 
-## JDK动态代理 
+### JDK动态代理 
+
 ~~~text
 需要使用JDK动态代理的类，必须要有接口实现
 ~~~
@@ -808,7 +815,7 @@ public interface RentHouse {
 }
 ~~~
 
-2. 定义目标类You，实现接口，重写方法
+2. 定义目标类，实现接口，重写方法
 ~~~java
 public class You implements RentHouse{
     @Override
@@ -819,18 +826,18 @@ public class You implements RentHouse{
     @Override
     public String toRentHouse2(String name) {
         System.out.println(name+"目标对象，租到房子");
-
         return "result01";
     }
 }
 ~~~
 
-3. 定义JDK动态代理类
+3. 定义JDK动态 代理类
 ~~~java
 public class JdkDynamicProxy {
 
     //目标对象
     private Object target;
+    
     //带参构造传递目标对象
     public JdkDynamicProxy(Object target) {
         this.target = target;
@@ -849,13 +856,15 @@ public class JdkDynamicProxy {
         ClassLoader classLoader = this.getClass().getClassLoader();
         //要代理的对象提供一组什么接口
         Class[] interfaces = target.getClass().getInterfaces();
+        
         //一个InvocationHandler接口，表示代理实例的调用处理程序实现的接口
         InvocationHandler invocationHandler = new InvocationHandler() {
             /**
-             * 当代理对象被调用时 invoke方法会被调用一次
-             * proxy 代理对象
-             * method 目标对象方法
-             * args 目标方法需要的参数
+             * 注：当代理对象被调用时 invoke方法会被调用一次
+             * 
+             * Object 代理对象
+             * Method 目标对象方法
+             * Object[] 目标方法需要的参数
              * */
             @Override
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -865,7 +874,7 @@ public class JdkDynamicProxy {
                 System.out.println("invoke...调用");
 
                 /**
-                 * 反射 invoke方法 调用目标对象方法
+                 *  反射 invoke方法 调用目标对象方法
                  *  方法名.invoke(对象,方法需所需参数)
                  * */
                 Object result = method.invoke(target, args);
@@ -887,16 +896,6 @@ public class JdkDynamicProxy {
 ~~~java
 public class com.zh.starter.StarterJdkDynamicProxy {
     public static void main(String[] args) {
-
-/*        //目标对象
-        RentHouse target = new You();
-        //代理类
-        JdkDynamicProxy jdkDynamicProxy = new JdkDynamicProxy(target);
-        //得到代理对象
-        RentHouse object = (RentHouse) jdkDynamicProxy.getProxy();
-
-        object.toRentHouse();*/
-
         //目标对象有返回值
         RentHouse target2 = new You();
         //动态代理类对象
@@ -913,7 +912,7 @@ public class com.zh.starter.StarterJdkDynamicProxy {
 
 ![img_0.png](image/JDK动态代理测试.png)
 
-## CGLIB 动态代理
+### CGLIB 动态代理
 
 ~~~text
 继承思想，代理类是目标类的子类，代理类对目标类中的方法进行重写
@@ -932,7 +931,7 @@ public class User {
 }
 ~~~
 
-2. 定义CglibDynamicProxy 动态代理类
+2. 定义 CglibDynamicProxy 动态代理类
 ~~~java
 public class CglibProxy {
 
@@ -1193,7 +1192,6 @@ public class LogCut {
 }
 ~~~
 
-# spring 集成 mybatis
 
 
 

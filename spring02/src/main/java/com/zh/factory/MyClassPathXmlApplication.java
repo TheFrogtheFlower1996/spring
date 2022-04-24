@@ -36,7 +36,7 @@ public class MyClassPathXmlApplication implements MyFactory{
      * */
     public MyClassPathXmlApplication(String fileName) {
 
-        /*解析配置文件*/
+        /*解析配置文件方法*/
         parseXml(fileName);
 
         /*得到实例化对象*/
@@ -69,7 +69,7 @@ public class MyClassPathXmlApplication implements MyFactory{
                 for (Element element : elementList) {
                     String id = element.attributeValue("id");
                     String clazz = element.attributeValue("clazz");
-                    //将id、clazz放入MyBean对象
+                    //将id、clazz放入 MyBean对象
                     MyBean myBean = new MyBean(id, clazz);
                     beanList.add(myBean);
                 }
@@ -90,7 +90,7 @@ public class MyClassPathXmlApplication implements MyFactory{
                 for (MyBean myBean : beanList) {
                     String id = myBean.getId();
                     String clazz = myBean.getClazz();
-                    //通过反射，实例化指定class属性值对应的Bean对象
+                    //通过反射机制，实例化指定class属性值对应的Bean对象
                     Object object = Class.forName(clazz).newInstance();
                     //将id值与实例化好的bean对象，设置到map中
                     beanMap.put(id,object);

@@ -17,7 +17,7 @@ public class Starter04 {
 
 //        BeanFactory beanFactory = new ClassPathXmlApplicationContext("spring04.xml");
 
-//        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("spring04.xml");
+        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("spring04.xml");
 
 //        TypeDao typeDao = (TypeDao) beanFactory.getBean("typeDao");
 /*        System.out.println(typeDao);
