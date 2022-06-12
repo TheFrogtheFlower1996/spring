@@ -26,13 +26,12 @@ public class MyClassPathXmlApplication implements MyFactory{
     //定义map对象，用来存放id属性与对应class属性实例化好的bean对象
     private Map<String,Object> beanMap = new HashMap<>();
 
-    //定义List集合，用来存放myBean对象（myBean是用来存放bean标签的id和对应的class属性值）
+    //定义List集合，用来存放myBean对象（myBean是用来存放 bean标签的id和对应的class属性值）
     private List<MyBean> beanList = null;
 
     /**
      * 有参构造
      * 1. 通过构造器的形参传递要解析的配置文件
-     *
      * */
     public MyClassPathXmlApplication(String fileName) {
 
@@ -46,7 +45,6 @@ public class MyClassPathXmlApplication implements MyFactory{
 
     /**
      * 2. 解析配置文件，得到对应的bean标签的id与class的属性值，并设置到对应的bean对象中，存放到List集合
-     *
      * */
     private void parseXml(String fileName) {
 
@@ -81,7 +79,6 @@ public class MyClassPathXmlApplication implements MyFactory{
     }
     /**
      * 3. 遍历List集合，得到每个Bean对象，得到class属性对应的实例化对象，并设置到map中，通过id实例化bean对象
-     *
      * */
     private void instanceBean() {
         try {
@@ -90,7 +87,7 @@ public class MyClassPathXmlApplication implements MyFactory{
                 for (MyBean myBean : beanList) {
                     String id = myBean.getId();
                     String clazz = myBean.getClazz();
-                    //通过反射机制，实例化指定class属性值对应的Bean对象
+                    //通过 反射机制，实例化指定class属性值对应的Bean对象
                     Object object = Class.forName(clazz).newInstance();
                     //将id值与实例化好的bean对象，设置到map中
                     beanMap.put(id,object);

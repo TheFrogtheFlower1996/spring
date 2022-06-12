@@ -32,6 +32,7 @@ public class JdkDynamicProxy {
         ClassLoader classLoader = this.getClass().getClassLoader();
         //要代理的对象提供一组什么接口
         Class[] interfaces = target.getClass().getInterfaces();
+
         //一个InvocationHandler接口，表示代理实例的调用处理程序实现的接口
         InvocationHandler invocationHandler = new InvocationHandler() {
             /**

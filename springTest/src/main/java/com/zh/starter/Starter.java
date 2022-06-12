@@ -26,5 +26,4 @@ public class Starter {
         as.test();
         us.test1();
     }
-
 }

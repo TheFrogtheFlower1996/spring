@@ -12,14 +12,14 @@ import com.zh.statics.You;
 public class StarterJdkDynamicProxy {
     public static void main(String[] args) {
 
-/*        //目标对象
-        RentHouse target = new You();
-        //代理类
-        JdkDynamicProxy jdkDynamicProxy = new JdkDynamicProxy(target);
-        //得到代理对象
-        RentHouse object = (RentHouse) jdkDynamicProxy.getProxy();
-
-        object.toRentHouse();*/
+//        //目标对象
+//        RentHouse target = new You();
+//        //代理类
+//        JdkDynamicProxy jdkDynamicProxy = new JdkDynamicProxy(target);
+//        //得到代理对象
+//        RentHouse object = (RentHouse) jdkDynamicProxy.getProxy();
+//
+//        object.toRentHouse();
 
         //目标对象有返回值
         RentHouse target2 = new You();

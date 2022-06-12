@@ -547,10 +547,14 @@ SpringMVC中的 Interceptor 拦截器也是相当重要和有用的，它的主�
  * @author zh
  * @date 2022/4/13 10:59
  * @description:说明 拦截器实现 方式一（实现接口） HandlerInterceptor
+ * 
  *  preHandle方法 表示 在目标方法（Handler）执行前 执行
- *      如果返回true，表示执行目标方法，false则不执行
+ *                  如果返回true，表示执行目标方法，false则不执行
+ *      
  *  postHandle 在目标方法（Handler）执行后，视图生成前 执行
+ *  
  *  afterCompletion 在目标方法（Handler）执行后，视图生成后 执行
+ *  
  */
 public class MyInterceptor01 implements HandlerInterceptor {
 

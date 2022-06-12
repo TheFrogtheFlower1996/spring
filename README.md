@@ -52,6 +52,8 @@ Spring Web模块
 
 # bean对象实例化
 
+## 现在一般用注解方式 自动装配 bean对象
+
 ## bean对象实例化 模拟
 
 * 定义测试类UserDao 测试方法test()
@@ -217,7 +219,7 @@ public class com.zh.starter.Starter {
 
 ## bean对象实例化 三种方式
 
-### 默认无参构造器 方式一 
+### 默认无参构造器
 
 ~~~text
 在xml配置文件中，配置bean标签，id表示需要实例化的bean对象id，class表示类路径
@@ -237,10 +239,7 @@ UseService us = (UseService) ac.getBean("useService");
 us.test1();
 ~~~
 
-
-
-
-### 静态方法 方式二 了解
+### 静态方法 了解
 
 ~~~text
 当我们指定Spring使用静态工厂方法创建Bean对象时，Spring将先解析配置文件，并根据配置文件指定的信息，通过反射调用静态工厂类的静态工厂方法，并将该静态方法的返回值作为Bean实例。
@@ -268,7 +267,7 @@ factory-method：返回的bean实例化对象
 <bean id="accountService" class="com.zh.factory.StaticFactory" factory-method="accountService"/>
 ~~~
 
-### 实例化工厂 方式三 了解
+### 实例化工厂 了解
 
 * 与静态工厂实例化区别
 ~~~text
@@ -349,7 +348,7 @@ public class TypeService {
 ### 构造函数注入
 
 ~~~text
-构造器注入存在循环依赖的问题（两个bean对象互相注入），最好使用set方法注入
+构造器注入 存在循环依赖的问题（两个bean对象互相注入），最好使用set方法注入
 ~~~
 
 * service类定义有参构造函数
@@ -358,11 +357,14 @@ public class TypeService {
 
     //bean对象
     private TypeDao typeDao;
-
-    //构造器注入
+    
+    /**
+     * 构造器注入
+     * */
     public TypeService(TypeDao typeDao) {
         this.typeDao = typeDao;
     }
+    
     /**
      * set方法注入，需要给属性字段提供set方法
      * */
@@ -471,8 +473,8 @@ private IUserDao iUserDao;
 
 ## singleton 单例作用域
 ~~~text
-默认情况下，Spring容器中加载Bean对象都是单例作用域。
-Spring容器在启动时会实例化bean对象，并将对象设置到单例缓存池中，下次获取时直接从缓存池中得到。
+默认情况下，Spring容器中加载Bean对象都是单例作用域
+Spring容器在启动时会实例化bean对象，并将对象设置到单例缓存池中，下次获取时直接从缓存池中得到
 ~~~
 
 ~~~xml
@@ -523,7 +525,7 @@ Bean对象存在于缓存中，使用时不用再去实例化bean，加快程序
 
 ## prototype 原型作用域
 ~~~text
-Spring容器启动时会实例化bean对象，不会将对象设置到单例缓存池中，每次请求都会重新创建一个新的Bean对象。
+Spring容器启动时会实例化bean对象，不会将对象放到单例缓存池中，每次请求都会重新创建一个新的Bean对象
 ~~~
 
 ![img_0.png](image/原型作用域.png)
@@ -541,7 +543,7 @@ Spring容器启动时会实例化bean对象，不会将对象设置到单例缓�
 # bean对象生命周期
 
 ~~~text
-在Spring中，Bean的生命周期包括Bean的定义、初始化、调用、销毁 4个阶段
+在Spring中，Bean的生命周期包括Bean的 定义、初始化、调用、销毁 4个阶段
 ~~~
 
 ### bean初始化 方式一
@@ -681,16 +683,17 @@ public class TaskJob02 {
 
 * 代理模式
 ~~~text
-为某一个对象（委托类）提提供一个代理（代理类），用来控制这个对象的访问。委托类和代理类有一个共同的父类或父接口。代理类会对请求做预处理、过滤，将请求分配给指定对象
+为某一个对象（目标类）提供一个代理（代理类），用来控制这个对象的访问。目标类和代理类有一个共同的父类或父接口。代理类会对请求做预处理、过滤，将请求分配给指定对象
 
 代理模式在java开发中是一种比较常见的设计模式。设计目的旨在为服务类和客户类之间插入其他功能，插入的功能对于调用者是透明的，起到伪装控制的作用。
-如住房的例子：房客、中介、房东；对应于代理模式中即：客户类、代理类、委托类（类代理类）
+
+如住房的例子：客户、中介、房东；对应于代理模式中即：客户类、代理类、目标类（委托类）
 ~~~
 
 * 代理模式设计原则
 ~~~text
-代理类 和 委托类 具有相似的行为（共有）
-代理类 增强 委托类的行为
+代理类 和 目标类 具有相似的行为（共有）
+代理类 增强 目标类的行为
 ~~~
 
 ![img_0.png](image/代理模式.png)
