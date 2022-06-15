@@ -8,7 +8,7 @@
   <artifactId>springNIO</artifactId>
   <version>1.0-SNAPSHOT</version>
 
-  <name>spring5X</name>
+  <name>springNIO</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

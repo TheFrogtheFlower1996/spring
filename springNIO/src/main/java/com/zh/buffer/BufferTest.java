@@ -11,6 +11,19 @@ import java.nio.ByteBuffer;
  */
 public class BufferTest {
 
+    /**
+     * allocate 不是直接内存，需要存入堆内存
+     * allocateDirect 直接内存的缓冲区
+     * */
+    @Test
+    public void test04(){
+
+        ByteBuffer buffer = ByteBuffer.allocateDirect(10);
+        ByteBuffer buffer1 = ByteBuffer.allocate(10);
+        System.out.println("是直接内存吗？ "+buffer.isDirect());
+        System.out.println("是直接内存吗？ "+buffer1.isDirect());
+    }
+
     @Test
     public void test03(){
         ByteBuffer buffer = ByteBuffer.allocate(10);
