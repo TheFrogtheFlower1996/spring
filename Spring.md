@@ -1,62 +1,14 @@
 # spring
 
-* 学习内容
-~~~text
-Spring IOC 控制反转、依赖注入
-Spring AOP 面向切面编程
-Spring JDBC + 事务
-Spring Task 定时调度
-Spring Mail 邮件发送
-~~~
+ 
 
-* Spring的作用
-~~~text
-Controller层
-    Servlet（接收请求、响应数据、地址配置、页面转发）
-    对应框架：Spring MVC
+# bean实例化
 
-Service层
-    Spring框架并不是针对service层的业务逻辑的，service没有适合框架
+*  现在一般用注解方式自动装配bean对象
 
-DAO层
-    JDBC操作
-    对应的框架：MyBatis
-~~~
+## bean实例化 模拟
 
-* Spring基于分布式的应用程序
-~~~text
-基于轻量级的框架
-    配置管理
-    Bean对象的实例化-IOC
-
-集成第三方框架
-    MyBatis、Hibernate（持久层框架）
-    Spring MVC
-    Spring Security权限
-    Quartz时钟框架（定时任务处理）
-    Elastic search 搜索引擎
-
-自带服务
-    Mail邮件发送
-    Task定时任务处理-定时调度（定时短信、定时任务）
-    消息处理（异步处理）
-~~~
-
-* Spring模块划分
-~~~text
-Spring IOC模块：Bean对象的实例化，Bean的创建
-Spring AOP模块：面向切面编程，动态代理
-Spring JDBC + 事务模块
-Spring Web模块
-~~~
-
-# bean对象实例化
-
-## 现在一般用注解方式 自动装配 bean对象
-
-## bean对象实例化 模拟
-
-* 定义测试类UserDao 测试方法test()
+* 定义DAO
 ~~~java
 public class UserDao {
     public void test(){
@@ -65,7 +17,7 @@ public class UserDao {
 }
 ~~~
 
-* 定义UserDao的bean对象 userDao
+* 定义dao的bean标签
 ~~~xml
 <?xml version="1.0" encoding="UTF-8"?>
 <beans>
@@ -100,9 +52,7 @@ public interface MyFactory {
 * 定义工厂接口实现类 MyClassPathXmlApplication，实现MyFactory工厂接口
 ~~~java
 /**
- * @author zh
- * @date 2022/3/25 11:53
- * @description:说明 工厂接口实现类
+ *  工厂接口实现类
  * 1. 通过构造器的形参传递要解析的配置文件
  * 2. 解析配置文件，得到对应的bean标签的 id与class的属性值，并设置到对应的bean对象中，存放到List集合
  * 3. 遍历List集合，得到每个Bean对象，得到class属性对应的实例化对象，并设置到map中，通过id实例化bean对象
@@ -201,23 +151,21 @@ public class MyClassPathXmlApplication implements MyFactory{
 }
 ~~~
 
-* 实现类
+* 客户端
 ~~~java
 public class com.zh.starter.Starter {
     public static void main(String[] args) {
 
         //得到spring上下文环境，ApplicationContext接口代表SpringIOC容器，负责实例化、配置和组装Bean
         BeanFactory ac = new ClassPathXmlApplicationContext("spring.xml");
-
         //得到被实例化的对象
         UseService us = (UseService) ac.getBean("useService");
-
         us.test1();
     }
 }
 ~~~
 
-## bean对象实例化 三种方式
+## bean实例化（三种方式）
 
 ### 默认无参构造器
 
@@ -232,7 +180,7 @@ public class com.zh.starter.Starter {
 <bean id="useService" class="com.zh.service.UseService"></bean>
 ~~~
 
-* 获取实例化对象
+* 客户端 获取实例化对象
 ~~~java
 BeanFactory ac = new ClassPathXmlApplicationContext("spring.xml");
 UseService us = (UseService) ac.getBean("useService");
@@ -246,7 +194,7 @@ us.test1();
 在这个过程中，Spring不再负责创建Bean实例，Bean实例是由用户提供的静态工厂方法提供的。
 ~~~
 
-* 定义静态工厂类，静态方法被 static 修饰，返回accountService实例化对象
+* 定义静态工厂类，里面有一个静态方法，返回值类型为bean对象
 ~~~java
 public class StaticFactory {
     /**
@@ -299,7 +247,7 @@ public class InstanceFactory {
 
 ### set方法注入
 
-* 定义TypeDao.java
+* 定义Dao
 ~~~java
 public class TypeDao {
 
@@ -309,7 +257,7 @@ public class TypeDao {
 }
 ~~~
 
-* 定义TypeService.java，service层set方法 手动注入bean对象
+* 定义Service，service层定义Dao类型变量，提供set方法，手动注入bean对象
 ~~~java
 public class TypeService {
 
@@ -345,13 +293,15 @@ public class TypeService {
 </beans>
 ~~~
 
-### 构造函数注入
+### 构造器注入（循环依赖）
 
 ~~~text
-构造器注入 存在循环依赖的问题（两个bean对象互相注入），最好使用set方法注入
+构造器注入 存在 循环依赖 的问题（两个bean对象互相注入），最好使用set方法注入
+
+从源码解决 通过三级缓存解决 循环依赖
 ~~~
 
-* service类定义有参构造函数
+* service类定义 带参构造器
 ~~~java
 public class TypeService {
 
@@ -396,24 +346,20 @@ public class TypeService {
 
 ## 自动注入
 
-### @Resource
-
 * 注解方式注入bean
 ~~~text
 对于bean的注入，除了使用xml配置外，可以使用注解配置。注解的配置，可以简化配置文件，提高开发速度，使程序看上去更加简洁。
 对于注解的解释，Spring对于注解的解释有专门的解释器，对定义的注解进行解析，实现对应bean对象的注入。通过反射技术实现。
 ~~~
 
-* @Resource 实现bean对象自动注入
+### @Resource
 ~~~text
-默认会根据bean标签的id属性值查找（属性字段名与bean标签的属性值相同）
-如果属性名称未找到，会根据类型（class）查找
+默认会根据bean标签的 id属性值（属性名称） 查找，如果属性名称未找到，会根据类型（class）查找
+
 如果注入的是接口，接口只有一个实现类时，能正常注入；如果接口有多个实现类，则需要使用name属性设置对应id值
 ~~~
 
-
-
-* xml文件配置（UserDao01.java，UserDao02.java 实现 IUserDao 接口）
+* xml文件配置（UserDao01 UserDao02 实现IUserDao接口）
 ~~~xml
 <bean id="userDao01" class="com.zh.dao.UserDao01"/>
 <bean id="userDao02" class="com.zh.dao.UserDao02"/>
@@ -426,11 +372,11 @@ private IUserDao iUserDao;
 ~~~
 
 ### @Autowired
-
 ~~~text
-默认通过类型（Class）查找Bean对象，与属性字段的名称无关
-属性可以提供set方法，也可以不提供set方法
-注解可以声明在属性级别或set方法级别
+默认通过 类型（Class） 查找Bean对象，与属性字段的名称无关
+
+属性可以提供set方法，也可以不提供set方法，注解可以声明在属性级别或set方法级别
+
 可以添加 @Qualifier 结合使用，通过value属性值查找bean对象（value属性值必须设置，且值要与bean标签的id属性值对应）
 ~~~
 
@@ -438,7 +384,7 @@ private IUserDao iUserDao;
 ~~~java
     //bean对象
     @Autowired
-    @Qualifier("td")
+    @Qualifier("td") //id属性值对应
     private TypeDao typeDao;
 ~~~
 
@@ -451,7 +397,7 @@ private IUserDao iUserDao;
 
 * 扫描器说明
 ~~~text
-作用：bean对象统一进行管理，简化开发配置，提高开发效率
+作用：对bean对象统一进行管理，简化开发配置，提高开发效率
 
 1. 设置自动化扫描的范围
     如果bean对象未在指定包范围，即使声明了注解，也无法实例化
@@ -469,9 +415,9 @@ private IUserDao iUserDao;
     <context:component-scan base-package="com.zh"/>
 ~~~
 
-# bean对象作用域
+# bean作用域
 
-## singleton 单例作用域
+## singleton 单例模式
 ~~~text
 默认情况下，Spring容器中加载Bean对象都是单例作用域
 Spring容器在启动时会实例化bean对象，并将对象设置到单例缓存池中，下次获取时直接从缓存池中得到
@@ -511,18 +457,6 @@ lazy-init=“true” 开启懒加载
 Bean对象存在于缓存中，使用时不用再去实例化bean，加快程序运行效率
 ~~~
 
-* 什么对象适合做单例？
-~~~text
-一般来说对于无状态或状态不可改变的对象适合做单例模式。（不存在会改变对象状态的成员变量）比如controller层、service层、dao层
-~~~
-
-* 什么是无状态或状态不可改变的对象？
-~~~text
-对象中不存在改变当前对象的状态的成员变量。
-实际上对象状态的变化往往均是由于属性值的变化而引起的，比如User类 姓名属性会有变化，属性姓名的变化一般会引起user对象状态的变化。
-对于我们程序而言，无状态对象没有实例对象的存在，证明了线程的安全性，service层业务对象即是无状态对象，线程是安全的。
-~~~
-
 ## prototype 原型作用域
 ~~~text
 Spring容器启动时会实例化bean对象，不会将对象放到单例缓存池中，每次请求都会重新创建一个新的Bean对象
@@ -540,15 +474,26 @@ Spring容器启动时会实例化bean对象，不会将对象放到单例缓存�
 ![img_0.png](image/原型实例化.png)
 
 
-# bean对象生命周期
+# bean生命周期
 
 ~~~text
-在Spring中，Bean的生命周期包括Bean的 定义、初始化、调用、销毁 4个阶段
+在Spring中，Bean的生命周期包括Bean的 实例化、属性赋值、初始化、销毁
+~~~
+
+* bean初始化两种方式
+~~~text
+方式一：bean标签内 用 init-method 定义初始化方法
+方式二：实现 初始化bean接口（InitializingBean），重写里面的方法（afterPropertiesSet()）
 ~~~
 
 ### bean初始化 方式一
 
 * 在bean标签配置 init-method属性 来指定初始化时调用的方法
+~~~xml
+<!--通过init-method属性指定初始化方法-->
+<bean id="typeDao" class="com.zh.dao.TypeDao" scope="singleton" init-method="test1" lazy-init="true"/>
+~~~
+
 ~~~java
 public class TypeDao {
     //定义初始化时被调用的方法
@@ -559,10 +504,6 @@ public class TypeDao {
 ~~~
 
 * xml配置文件 bean标签
-~~~xml
-<!--通过init-method属性指定初始化方法-->
-<bean id="typeDao" class="com.zh.dao.TypeDao" scope="singleton" init-method="test1" lazy-init="true"/>
-~~~
 
 ### bean初始化 方式二
 
@@ -580,7 +521,7 @@ public class TypeDao implements InitializingBean {
 
 ### bean调用
 
-* BeanFactory 或 ApplicationContext
+* 使用bean工厂（BeanFactory） 或 应用上下文（ApplicationContext）
 ~~~java
 //得到spring上下文环境
 BeanFactory beanFactory = new ClassPathXmlApplicationContext("spring04.xml");
@@ -595,6 +536,10 @@ ApplicationContext applicationContext = new ClassPathXmlApplicationContext("spri
 ![img_0.png](image/ApplicationContext-2.png)
 
 ### bean销毁
+~~~text
+bean标签内指定销毁方法
+~~~
+
 
 * bean标签添加 destroy-method 属性，指定销毁方法
 ~~~xml
@@ -602,7 +547,7 @@ ApplicationContext applicationContext = new ClassPathXmlApplicationContext("spri
 <bean id="typeDao" class="com.zh.dao.TypeDao" destroy-method="destroy"/>
 ~~~
 
-* 通过 AbstractApplicationContext 接口，close方法销毁bean对象
+* 通过调用AbstractApplicationContext接口的close方法销毁bean对象
 ~~~java
 AbstractApplicationContext aac = new ClassPathXmlApplicationContext("spring04.xml");
 aac.close();
@@ -610,8 +555,33 @@ aac.close();
 
 # spring Task 定时任务
 
+~~~text
+方式一、在配置文件的 task标签 定义定时任务
 
-## xml
+方式二、在配置文件中 开启定时任务驱动，定时任务类上添加 @Scheduled 注解
+~~~
+
+* cron 时间表达式
+~~~xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/task
+       http://www.springframework.org/schema/task/spring-task.xsd">
+    
+        <!--定义定时任务-->
+        <task:scheduled-tasks>
+            <task:scheduled ref="taskJob" method="job1" cron="0/2 * * * * ?"/>
+            <task:scheduled ref="taskJob" method="job2" cron="0/5 * * * * ?"/>
+        </task:scheduled-tasks>
+
+        <!--开启定时任务驱动，spring识别 @Scheduled 注解-->
+        <task:annotation-driven/>
+</beans>
+~~~
 
 * 定义定时任务类
 ~~~java
@@ -628,38 +598,6 @@ public class TaskJob {
 }
 ~~~
 
-* 在beans标签添加Task规范
-~~~xml
-<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:context="http://www.springframework.org/schema/context"
-       xmlns:task="http://www.springframework.org/schema/task"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans
-       http://www.springframework.org/schema/beans/spring-beans.xsd
-       http://www.springframework.org/schema/context
-       http://www.springframework.org/schema/context/spring-context.xsd
-       http://www.springframework.org/schema/task
-       http://www.springframework.org/schema/task/spring-task.xsd">
-
-    <!--开启自动扫描，设置扫描包的范围-->
-    <context:component-scan base-package="com.zh"/>
-
-    <!--定义定时任务-->
-        <task:scheduled-tasks>
-            <task:scheduled ref="taskJob" method="job1" cron="0/2 * * * * ?"/>
-            <task:scheduled ref="taskJob" method="job2" cron="0/5 * * * * ?"/>
-        </task:scheduled-tasks>
-</beans>
-~~~
-
-## @Scheduled
-
-* xml 开启定时任务驱动
-~~~xml
-<!--开启定时任务驱动，spring识别@Scheduled注解-->
-<task:annotation-driven/>
-~~~
 
 * 定义在定时类方法上
 ~~~java
@@ -1195,20 +1133,105 @@ public class LogCut {
 }
 ~~~
 
+# 面试
+
+## Spring是什么?
+~~~text
+Spring是一个轻量级的IoC和AOP容器框架
+~~~
+
+## 七大模块
+
+![img_0.png](image/spring.png)
 
 
+## 为什么使用Spring？
+~~~text
+1、方便解耦，简化开发
+    通过Spring提供的IoC容器，可以将对象之间的依赖关系交由Spring进行控制，避免硬编码所造成的过度程序耦合
+
+2、AOP编程的支持
+    通过Spring提供的AOP功能，方便进行面向切面的编程，如权限控制、事务管理、日志管理等
+
+3、声明式事务的支持
+4、方便集成各种优秀框架
+~~~
+
+## 什么是AOP，为什么使用AOP？
+~~~text
+AOP，面向切面编程，就是把可重用的功能提取出来，然后将这些通用功能在合适的时候织入到应用程序中，比如事务管理、权限控制、日志记录、性能统计等
+AOP并没有帮助我们解决任何新的问题，它只是提供了一种更好的办法，能够用更少的工作量来解决现有的一些问题，使得系统更加健壮，可维护性更好
+~~~
+
+## 什么是Spring的事务管理？
+~~~text
+ 事务就是对一系列的数据库操作（比如插入多条数据）进行统一的提交或回滚操作，如果插入成功，那么一起成功，如果中间有一条出现异常，那么回滚之前的所有操作。
+ 这样可以防止出现脏数据，防止数据库数据出现问题。开发中为了避免这种情况一般都会进行事务管理。
+ Spring的声明式事务通常是指在配置文件中对事务进行配置声明，其中包括了很多声明属性，它是通过Spring Proxy帮你做代理，自己不用额外的写代码，只要在Spring配置文件中声明即可；通常用在数据库的操作里面
+
+Spring中也有自己的事务管理机制，一般是使用TransactionMananger进行管理，可以通过Spring的注入来完成此功能
+~~~ 
+
+## BeanFactory 和 ApplicationContext 有什么区别
+~~~text
+BeanFactory和ApplicationContext是Spring的两大核心接口，都可以当做Spring的容器
+
+1、BeanFactory是Spring里面最底层的接口，是IoC的核心，定义了IoC的基本功能，包含了各种Bean的定义、加载、实例化，依赖注入和生命周期管理。ApplicationContext接口作为BeanFactory的子类，除了提供BeanFactory所具有的功能外，还提供了更完整的框架功能
+
+2、BeanFactory采用的是 懒加载 形式来注入Bean的，只有在使用到某个Bean时(调用getBean())，才对该Bean进行加载实例化。不能提前发现一些存在的Spring的配置问题。
+   ApplicationContext，它是在容器启动时，一次性创建了所有的Bean。这样有利于检查所依赖属性是否注入。不足是占用内存空间，当应用程序配置Bean较多时，程序启动较慢。
+~~~
+
+## Spring框架中的Bean是线程安全的么？如果线程不安全，那么如何处理？
+~~~text
+1、对于原型作用域，每次都创建一个新对象，也就是线程之间不存在Bean共享，因此不会有线程安全问题。
+
+2、对于单例作用域的Bean，所有的线程都共享一个单例实例的Bean，因此是存在线程安全问题的。但是如果单例Bean是一个无状态Bean，也就是线程中的操作不会对Bean的成员执行查询以外的操作，那么这个单例Bean是线程安全的。比如Controller类、Service类和Dao等，这些Bean大多是无状态的，只关注于方法本身。
+~~~
+
+## Spring如何解决循环依赖？
+
+* 循环依赖问题在Spring中主要有三种情况
+~~~text
+（1）通过构造方法进行依赖注入时产生的循环依赖问题
+（2）通过setter方法进行依赖注入且是在多例（原型）模式下产生的循环依赖问题
+（3）通过setter方法进行依赖注入且是在单例模式下产生的循环依赖问题
+~~~
+
+* 在Spring中，只有第（3）种方式的循环依赖问题被解决了，其他两种方式在遇到循环依赖问题时都会产生异常。这是因为
+~~~text
+第一种构造方法注入的情况下，在new对象的时候就会堵塞住了，其实也就是”先有鸡还是先有蛋“的历史难题
+
+第二种setter方法（多例）的情况下，每一次getBean()时，都会产生一个新的Bean，如此反复下去就会有无穷无尽的Bean产生了，最终就会导致OOM问题的出现
+
+Spring在单例模式下的setter方法依赖注入引起的循环依赖问题，主要是通过二级缓存和三级缓存来解决的，其中三级缓存是主要功臣。
+解决的核心原理就是：在对象实例化之后，依赖注入之前，Spring提前暴露的Bean实例的引用在第三级缓存中进行存储
+~~~
 
 
+## Spring事务的实现方式和实现原理
+~~~text
+Spring事务的本质其实就是数据库对事务的支持，没有数据库的事务支持，spring是无法提供事务功能的。
+Spring只提供统一事务管理接口，具体实现都是由各数据库自己实现，数据库事务的提交和回滚是通过 redo log 和 undo log实现的。Spring会在事务开始时，根据当前环境中设置的隔离级别，调整数据库隔离级别，由此保持一致
+~~~
+
+* Spring事务的种类
+~~~text
+spring支持 编程式事务管理 和 声明式事务管理 两种方式
+
+编程式事务管理使用 TransactionTemplate
+
+声明式事务管理建立在AOP之上的。其本质是通过AOP功能，对方法前后进行拦截，将事务处理的功能编织到拦截的方法中，也就是在目标方法开始之前启动一个事务，在执行完目标方法之后根据执行情况提交或者回滚事务
+
+声明式事务最大的优点就是不需要在业务逻辑代码中掺杂事务管理的代码，只需在配置文件中做相关的事务规则声明或通过@Transactional注解的方式，
+便可以将事务规则应用到业务逻辑中，减少业务代码的污染。唯一不足地方是，最细粒度只能作用到方法级别，无法做到像编程式事务那样可以作用到代码块级别
+~~~
+
+* spring的事务传播机制
+~~~text
+spring事务的传播机制说的是，当多个事务同时存在的时候，spring如何处理这些事务的行为。事务传播机制实际上是使用简单的ThreadLocal实现的，所以，如果调用的方法是在新线程调用的，事务传播实际上是会失效的
 
 
-
-
-
-
-
-
-
-
-
+~~~
 
 
