@@ -16,7 +16,7 @@
 5、低耦合 高内聚 特征
 ~~~
 
-## 单一职责 原则
+1. 单一职责 原则
 
 * 单一职责
 
@@ -61,7 +61,7 @@ class Vehicle3{
 ![img_0.png](image-SJMS/单一职责2.png)
 
 
-## 接口隔离 原则
+2. 接口隔离 原则
 
 ![img_0.png](image-SJMS/接口隔离.png)
 
@@ -69,7 +69,7 @@ class Vehicle3{
 
 ![img_0.png](image-SJMS/接口隔离3.png)
 
-## 依赖倒转 原则
+3. 依赖倒转 原则
 
 ![img_0.png](image-SJMS/依赖倒转.png)
 
@@ -148,7 +148,7 @@ class Person2 {
 }
 ~~~
 
-### 依赖关系传递的三种方式
+ 依赖关系传递的三种方式
 
 ~~~text
 1、接口传递
@@ -276,7 +276,7 @@ class C3 implements A3 {
 }
 ~~~
 
-## 里式替换 原则
+4. 里式替换 原则
 
 ![img_0.png](image-SJMS/里式替换.png)
 
@@ -364,7 +364,7 @@ class B1 extends Fu{
 }
 ~~~
 
-## 开闭 原则
+5. 开闭 原则
 
 ![img_0.png](image-SJMS/开闭.png)
 
@@ -422,20 +422,20 @@ class K extends Father{
 }
 ~~~
 
-## 迪米特 原则
+6. 迪米特 原则
 
 ![img_0.png](image-SJMS/迪米特.png)
 
 ![img_0.png](image-SJMS/迪米特1.png)
 
-## 合成复用 原则
+7. 合成复用 原则
 
 ![img_0.png](image-SJMS/合成复用.png)
 
 
 # UML类图
 
-## 依赖关系（产生关系）
+1. 依赖关系（产生关系）
 ~~~text
 只要再类中用到了对方，就产生依赖关系
 
@@ -444,7 +444,7 @@ class K extends Father{
 ![img_0.png](image-SJMS/UML类图1.png)
 
 
-## 泛化关系（继承）
+2. 泛化关系（继承）
 ~~~text
 泛化关系就是继承关系，属于依赖关系的特例
 
@@ -453,7 +453,7 @@ class K extends Father{
 
 ![img_0.png](image-SJMS/UML类图2.png)
 
-## 实现关系（接口实现）
+3. 实现关系（接口实现）
 ~~~text
 类实现接口属于实现关系，也是依赖关系的特例
 
@@ -462,17 +462,17 @@ class K extends Father{
 
 ![img_0.png](image-SJMS/UML类图3.png)
 
-## 关联关系（一对多 多对多）
+4. 关联关系（一对多 多对多）
 
 ![img_0.png](image-SJMS/UML类图4.png)
 
-## 聚合关系（整体和部分可分）
+5. 聚合关系（整体和部分可分）
 
 ![img_0.png](image-SJMS/UML类图5.png)
 ![img_0.png](image-SJMS/UML类图6.png)
 
 
-## 组合关系（整体和部分不可分）
+6. 组合关系（整体和部分不可分）
 
 ![img_0.png](image-SJMS/UML类图7.png)
 
@@ -489,16 +489,35 @@ class K extends Father{
 
 ## 单例模式 (Singleton)
 
-![img_0.png](image-SJMS/单例模式.png)
+~~~text
+所谓类的单例设计模式，就是采取一定的方法保证在整个的系统中，对某个类 【只能存在一个对象实例】，并且该类只提供一个取得其对象实例的方法（静态方法）
 
-![img_0.png](image-SJMS/单例模式1.png)
+比如Hibernate的SessionFactory，它充当数据存储源的代理，并负责创建Session对象。SessionFactory并不是轻量级的，一般情况下，一个项目通常只需要一个SessionFactory就够，这里就用到单例模式
+~~~
 
-![img_0.png](image-SJMS/饿汉式.png)
+* 八种单例模式
+~~~text
+1.饿汉式（静态变量）
+2.饿汉式（静态代码块）
+
+3.懒汉式（线程不安全）
+4.懒汉式（线程安全，同步方法）
+5.懒汉式（线程安全，同步代码块）
+
+6.双重检查锁
+7.静态内部类
+8.枚举
+~~~
+
+* 单例模式分为两种
+~~~text
+饿汉式：类加载就会导致该单实例对象被创建
+懒汉式：类加载不会导致该单实例对象被创建，而是首次使用该对象时才会创建
+~~~
+
 
 
 ### 饿汉式（静态变量）
-
-
 
 ~~~java
 public class Test01 {
@@ -527,9 +546,18 @@ class A{
 }
 ~~~
 
-![img_0.png](image-SJMS/饿汉式1.png)
+* 优缺点
+~~~text
+1）优点：写法简单，就是在类装载的时候实现实例化，避免线程同步问题
+2）缺点：在类装载的时候就完成实例化，没有完成 Lazy loading 的效果。如果从始至终从未使用这个实例，会造成内存浪费
 
-* Runtime
+3）这种方式基于classloader机制避免了多线程的同步问题，不过，instance在类装载时就实例化，在单例模式中大多数都是调用getInstance方法，
+但是导致类装载的原因有很多种，因此不能确定有其他的方式（或者其他的静态方法）导致类装载，这时初始化instance就没有达到 lazy loading 的效果
+
+4)结论：这种单例模式可用，可能造成内存浪费
+~~~
+
+* Runtime源码
 
 ~~~java
 public class Runtime {
@@ -607,7 +635,13 @@ class A {
 }
 ~~~
 
-![img_0.png](image-SJMS/懒汉式.png)
+* 懒汉式（线程不安全）优缺点说明
+~~~text
+1）起到了 Lazy loading的效果，但是只能在单线程下使用
+2）如果在多线程下，一个线程进入了 if(a == null)判断语句块，还未来得及往下执行，另外一个线程也通过了这个判断语句，这时便会产生多个实例。
+    所以在多线程环境下不可使用这种方式
+3）结论：在实际开发中，不能使用这种方式
+~~~
 
 
 ### 懒汉式（线程安全，同步方法）
@@ -645,7 +679,14 @@ class A {
 }
 ~~~
 
-![img_0.png](image-SJMS/懒汉式1.png)
+*　懒汉式（同步方法，线程安全）优缺点
+~~~text
+1）解决了线程不安全问题
+2）效率太低，每个线程都想获得类的实例的时候，执行getInstance()方法都要进行同步，而其实这个方法只执行一次实例化代码就够，
+    后面的想获得该类实例，直接return就行了。方法进行同步效率太低
+3）结论：在实际开发中，不推荐使用这种方式
+~~~
+
 
 
 
@@ -693,9 +734,19 @@ class A {
 }
 ~~~
 
-![img_0.png](image-SJMS/懒汉式4.png)
+* 双重检查锁 优缺点
+~~~text
+1）Double-Check 概念是多线程开发中常使用到的，如代码中所示，我们进行了两次if(a == null)检查，这样就可以保证线程安全
+2）这样，实例化代码只用执行一次，后面再访问时，判断if(a == null)，直接return实例化对象，也避免反复进行方法同步
+3）线程安全，延迟加载，效率较高
+4）结论：实际开发中，推荐使用这种单例模式
+~~~
 
-![img_0.png](image-SJMS/懒汉式8.png)
+* 存在问题
+~~~text
+在多线程的情况下，可能会出现空指针问题，出现问题的原因是JVM在实例化对象的时候进行优化和指令重排序操作。
+要解决双重检查锁模式带来空指针异常的问题，只需要使用 volatile 关键字，该关键字可以保证可见性和有序性
+~~~
 
 ### 静态内部类
 
@@ -730,7 +781,14 @@ class A {
 }
 ~~~
 
-![img_0.png](image-SJMS/懒汉式5.png)
+* 静态内部类 优缺点
+~~~text
+1）这种方式采用了类装载的机制来保证初始化实例时只有一个线程
+2）静态内部类方式在A类被装载时并不会立即实例化，而是在需要实例化时，调用getInstance方法，才会装载AInstance类，完成A的实例化
+3）类的静态属性只会在第一次加载类时初始化，所以在这里，JVM帮助我们保证了线程安全性，在类进行初始化时，别的线程是无法进入的
+4）优点：避免了线程不安全，利用静态内部类特点来实现延迟加载，效率高
+~~~
+
 
 
 ### 枚举
@@ -755,10 +813,21 @@ enum A{ //枚举类
 }
 ~~~
 
-![img_0.png](image-SJMS/懒汉式6.png)
+* 优缺点 
+~~~text
+枚举类实现单例模式是极力推荐的单例模式，因为枚举类型是线程安全的，并且只会装载一次，设计者充分利用了枚举这个特征来实现单例模式，
+枚举的写法非常简单，而且枚举类型是所有单例实现中唯一一种不会被破坏的单例实现模式
+~~~
+
 
 
 * 单例总结
+
+~~~text
+1）单例模式保证了系统内存中该类只存在一个对象，节省了系统资源，对于一些需要频繁创建销毁的对象，使用单例模式可以提高系统性能
+2）当想实例化一个单例类的时候，必须要记住使用相应的获取对象的方法，而不是使用new
+3）单例模式使用的场景：需要频繁的进行创建和销毁的对象、创建对象时耗时过多或耗费资源过多（即：重量级对象），但又经常用到的对象、工具类对象、频繁访问数据库或文件的对象（比如数据库、session工厂等）
+~~~
 
 ![img_0.png](image-SJMS/懒汉式7.png)
 
@@ -1275,9 +1344,9 @@ public class AbstractFactoryPattern {
 系统要求提供一个产品类的库，所有产品以同样的接口出现，客户端不需要依赖具体实现。
 ~~~
 
-## 原型模式 (Prototype)
+## 原型模式
 
-* 概述
+* 概述 
 ~~~text
 用一个已经创建的实例作为原型，通过复制该原型对象来创建一个和原型对象相同的新对象
 ~~~
@@ -1300,25 +1369,195 @@ public class AbstractFactoryPattern {
 深克隆：创建一个新对象，属性中引用的其他对象也会被克隆，不再指向原有对象地址
 ~~~
 
+~~~text
+Java中的Object类中提供了 clone() 方法来实现浅克隆。Cloneable接口是上面的类图中的抽象原型类，而实现了Cloneable
+接口的子实现类就是具体的原型类，代码如下：
+~~~
 
+* Realizetype(具体的原型类)
+~~~java
+public class Realizetype implements Cloneable{
 
+    public Realizetype(){
+        System.out.println("具体的原型对象创建完成");
+    }
 
+    //重写clone方法
+    @Override
+    public Realizetype clone() throws CloneNotSupportedException {
+        System.out.println("具体原型复制成功");
+        return (Realizetype) super.clone();
+    }
+}
 
+//测试类
+public class Client {
+    public static void main(String[] args) throws CloneNotSupportedException {
 
+        Realizetype realizetype = new Realizetype();
+        Realizetype clone = realizetype.clone();
+        System.out.println("原型对象和克隆出来的是否是同一个对象？"+(realizetype == clone));//false
+    }
+}
+~~~
 
+* 案例
 
+![img_0.png](image-SJMS/原型模式1.png)
 
+*　具体原型类
+~~~java
+import lombok.Data;
 
+@Data
+public class Citation implements Cloneable{
 
+    private String name;
 
+    @Override
+    public Citation clone() throws CloneNotSupportedException {
+        return (Citation) super.clone();
+    }
 
+    public void show(){
+        System.out.println(name + "同学，获得奖状");
+    }
+}
+~~~
 
+＊ 测试类
+~~~java
+public class CitationTest {
+    public static void main(String[] args) throws CloneNotSupportedException {
 
+        Citation citation = new Citation();// 1）创建原型对象
 
+        Citation clone = citation.clone();
+        clone.setName("张三");//张三同学，获得奖状
+        clone.show();
 
+        Citation clone1 = citation.clone();
+        clone1.setName("李斯");
+        clone1.show();//李斯同学，获得奖状
+    }
+}
+~~~
 
+* 使用场景
+~~~text
+对象的创建非常复杂，可以使用原型模式快捷的创建对象。性能和安全要求比较高。
+~~~
+
+* **深克隆** 后续再看
+
+~~~text
+将上面的三好学生奖状的案例中Citation类的name属性修改为Student类型的属性
+~~~
+
+* 代码如下
+~~~java
+public class CitationStuTest {
+    public static void main(String[] args) throws CloneNotSupportedException {
+
+        CitationStu cs = new CitationStu();
+        
+        //创建对象stu
+        Student stu = new Student();
+        stu.setName("张三");
+        cs.setStu(stu);
+        
+        cs.show();//张三同学，获得奖状
+
+        //获取克隆对象
+        CitationStu clone = cs.clone();
+        
+        //获取对象stu1
+        Student stu1 = clone.getStu();
+        stu1.setName("李四");
+
+        System.out.println("stu 和 stu1 是否是同一个对象："+ (stu == stu1)); //true
+
+        cs.show();//李四同学，获得奖状
+        clone.show();//李四同学，获得奖状
+    }
+}
+~~~
+
+![img_0.png](image-SJMS/原型模式2.png)
+
+* 说明
+~~~text
+stu和stu1是同一个对象，就会产生将stu1对象中name属性修改为“李四”，两个Citation（奖状）对象中显示的都是李四。
+这就是浅克隆的效果，对具体原型类（Citation）中引用类型的属性进行引用的复制。这种情况需要深克隆，而进行深克隆需要用到对象流。
+~~~
 
 ## 建造者模式 (Builder)
+
+* 概述
+
+~~~textmate
+将一个复杂对象的构建与表示分离，使得相同的构建过程可以创建不同的表示。
+
+1. 分离了部件的 构造（由Builder来负责）和 装配 （由Builder负责）。从而可以构造出复杂的对象。这个模式适用于：某个对象的构造过程复杂的情况（台式电脑组装过程就类似于复杂对象的创建）
+2. 由于实现了构造和装配的解耦。不同的构造器，相同的装配，也可以做出不同的对象；相同的构造器，不同的装配顺序也可以做出不同的对象。也就是实现了构建算法、装配算法的解耦，实现了更好的复用。
+3. 建造者模式可以将部件和其组装过程分开，一步一步创建一个复杂的对象。用户只需要指定复杂对象的类型就可以得到该对象，而无须知道其内部的具体构造细节。
+~~~
+
+* 建造者模式结构
+~~~text
+1. 抽象建造者（Builder）：这个接口规定要实现复杂对象的哪些部分的创建，并不涉及具体的部件对象的创建
+2. 具体创建者类（ConcreteBuilder）：实现Builder接口，完成复杂产品的各个部件的具体创建方法。在创建过程完成后，提供产品的实例 
+3. 产品类（Product）：要创建的复杂对象
+4. 指挥者类（Director）：调用具体建造者来创建复杂对象的各个部分，在指导者中不涉及具体产品的信息，只负责保证对象各部分完整创建或按某种顺序创建
+~~~
+
+* 类图
+
+![img_0.png](image-SJMS/建造者模式.png)
+
+* 实例：创建自行车
+
+~~~text
+生产自行车是一个复杂的过程，包含 车架、车座等组件的生产；而车架又有碳纤维、铝合金等材质，车座有橡胶、真皮等材质。
+
+这里的Bike是产品，包含车架，车座等组件；Builder是抽象建造者，MobikeBuilder和OFOBuilder是具体的构建者；Director是指挥者；
+~~~
+
+![img_0.png](image-SJMS/建造者模式1.png)
+
+* 优点
+~~~text
+1.建造者模式的封装性很好。
+    使用建造者模式可以有效的封装变化，在使用建造者模式的场景中，一般产品类和建造者类是比较稳定的，因此，将主要业务逻辑封装在指挥者类中对整体而言可以取得比较好的稳定性。
+    
+2.在建造者模式中，客户端不必知道产品内部组成的细节，将产品本身与产品的创建过程解耦，使得相同的创建过程可以创建不同的产品对象。
+
+3.可以更加精细的控制产品的创建过程。
+    将复杂产品的创建步骤分解在不同的方法中，使得创建过程更加清晰，也方便使用程序来控制创建过程。
+    
+4.建造者模式很容易进行扩展。
+    如果有新的需求，通过实现一个新的建造者类就可以完成，基本上不用修改之前已经测试通过的代码，因此也就不会对原有功能引入风险，
+~~~
+
+* 缺点
+~~~text
+建造者模式所创建的产品一般具有较多的共同点，其组成部分相似，如果产品之间差异性很大，则不适合使用建造者模式，使用范围有一定局限
+~~~
+
+*　使用场景
+~~~text
+建造者（builder）模式创建的是复杂对象，其产品的各个部分经常面临着剧烈的变化，但将他们组合在一起的算法却相对稳定，所以通常在以下场景使用：
+
+1.创建的对象较复杂，由多个部件构成，各部件面临着复杂的变化，但构建的创建顺序是稳定的。
+2.创建复杂对象的算法独立于该对象的组成部分以及他们的装配方式，即产品的构架过程和最终的表示是独立的。
+~~~
+
+* 模式对比
+
+![img_0.png](image-SJMS/模式对象.png)
+
+
+
 
 # 结构性模式
 
