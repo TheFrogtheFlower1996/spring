@@ -931,7 +931,7 @@ class A implements Serializable {
 
 ## 工厂模式
 
-### 简单工厂模式
+### 简单工厂模式（Simple Factory）
 
 * 简单工厂模式介绍
 ~~~text
@@ -1505,10 +1505,13 @@ stu和stu1是同一个对象，就会产生将stu1对象中name属性修改为�
 
 * 建造者模式结构
 ~~~text
-1. 抽象建造者（Builder）：这个接口规定要实现复杂对象的哪些部分的创建，并不涉及具体的部件对象的创建
-2. 具体创建者类（ConcreteBuilder）：实现Builder接口，完成复杂产品的各个部件的具体创建方法。在创建过程完成后，提供产品的实例 
-3. 产品类（Product）：要创建的复杂对象
-4. 指挥者类（Director）：调用具体建造者来创建复杂对象的各个部分，在指导者中不涉及具体产品的信息，只负责保证对象各部分完整创建或按某种顺序创建
+1. 产品（Product）：要创建的复杂对象
+
+2. 抽象建造者（Builder）：这个接口规定要实现复杂对象的哪些部分的创建，并不涉及具体的部件对象的创建  
+3. 具体建造者（ConcreteBuilder）：实现Builder接口，完成复杂产品的各个部件的具体创建方法。在创建过程完成后，提供产品的实例
+
+4. 抽象 指挥者（Director）：调用具体建造者来创建复杂对象的各个部分，在指导者中不涉及具体产品的信息，只负责保证对象各部分完整创建或按某种顺序创建
+5. 具体 客户端（Client）：通过抽象指挥者，传入具体建造者，得到具体产品
 ~~~
 
 * 类图
@@ -1556,16 +1559,374 @@ stu和stu1是同一个对象，就会产生将stu1对象中name属性修改为�
 
 ![img_0.png](image-SJMS/模式对象.png)
 
+# 结构型模式
 
+* 概述
+~~~text
+结构性模式描述如何将类或对象按某种布局组成更大的结构，它分为类结构性模式和对象结构性模式，前者采用继承机制来组织接口和类，
+后者采用组合和聚合来组合对象。
 
+由于组合关系或聚合关系比继承关系耦合度低，满足 '合成复用原则'，所以对象结构性模式比类结构性模式具有更大的灵活性
+~~~
 
-# 结构性模式
+![img_0.png](image-SJMS/结构性模式.png)
 
 ## 代理模式 (Proxy)
 
+* 代理模式分为三种角色
+~~~text
+抽象主题类（Subject）：通过接口或抽象类声明真实主题和代理对象实现的业务方法
+真实主题类（Real Subject）：实现了抽象主题中的具体业务，是代理对象所代表的真实对象，是最终要引用的对象
+代理对象（Proxy）：提供了与真实主题相同的接口，其内部含有对真实主题的引用，它可以访问、控制或扩展真实主题的功能
+~~~
+
+### 静态代理
+
+* 例：火车站买票：火车站是目标对象，代售点是代理对象
+
+![img_0.png](image-SJMS/代理模式.png)
+
+### JDK动态代理
+
+* 代理类和目标类实现同样的接口
+
+* 动态代理工厂类：获取代理对象
+
+~~~java
+public class ProxyFactory {
+
+    private Object target;
+    //传递目标对象
+    public ProxyFactory(Object target) {
+        this.target = target;
+    }
+
+    //代理工厂，返回代理对象
+    public Object getProxyObject(){
+        Object obj =  Proxy.newProxyInstance(
+                target.getClass().getClassLoader(),
+                target.getClass().getInterfaces(),
+                new InvocationHandler() {
+                    @Override
+                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                        /**
+                         *  反射 invoke方法 调用目标对象方法
+                         *  方法名.invoke(对象,方法需所需参数)
+                         * */
+                        Object object = method.invoke(target, args);
+                        return object;
+                    }
+                }
+        );
+        return obj;
+    }
+}
+~~~
+
+### CGLIB动态代理
+
+* CGLIB是一个功能强大，高性能的代码生成器。它为没有实现接口的类提供代理，为JDK的动态代理提供了很好的补充。
+
+* 实现过程
+
+~~~java
+/**
+ * 代理对象工厂，用来生成代理对象
+ * **/
+public class ProxyFactory implements MethodInterceptor {
+
+    //目标对象(父类)
+    private Object target;
+
+    public ProxyFactory(Object target) {
+        this.target = target;
+    }
+
+    /**
+     * 获取代理对象方法
+     * 1.调用 Enhancer类的 setSuperclass()方法，设置目标对象为代理对象父类
+     * 2.调用 Enhancer类的 create()方法，生成代理对象
+     * **/
+    public Object getProxyObject(){
+        //类似JDK代理中的Proxy类
+        Enhancer enhancer = new Enhancer();
+        //指定父类
+        enhancer.setSuperclass(target.getClass());
+        //设置回调函数
+        enhancer.setCallback(this);
+        //创建代理对象
+        Object proxyObject = enhancer.create();
+        return proxyObject;
+    }
+
+    //重写拦截器，调用目标方法，实现功能增强
+    @Override
+    public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable {
+        System.out.println("代理方法执行！！");
+        //调用目标对象方法
+        Object obj = method.invoke(target, objects);
+        return obj;
+    }
+}
+~~~
+
 ## 适配器模式 (Adapter)
 
+* 概述
+~~~text
+将一个类的接口转换成客户希望的另外一个接口，使得原本由于接口不兼容而不能一起工作的那些类一起工作。
+适配器模式分为 类适配器 和 对象适配器模式，前者类之间的耦合度比后者高，且要求程序员了解现有组件库中相关组件的内部结构，所以相对应用较少
+~~~
+
+* 结构
+~~~text
+目标接口（Target）：当前系统业务所期待的接口，可以是抽象类或接口
+
+适配者类（Adaptee）：是被访问和适配的现存组件库的组件接口
+
+适配器类（Adapter）：是一个转换器，通过继承或引用适配器的对象，把适配器接口转换成目标对象，让客户按目标对象的格式访问适配者
+~~~
+
+### 类适配器模式
+
+* 定义
+~~~text
+定义一个适配器类来实现当前系统的业务接口，同时又继承现有组件库中已经存在的组件
+~~~
+
+* 例：读卡器
+~~~text
+现有一台电脑只能读SD卡，而需要读取TF卡中的内容的话就需要使用到适配器模式，创建一个读卡器，将TF卡中的内容读取出来
+~~~
+
+![img_0.png](image-SJMS/类适配器模式.png)
+
+
+* 适配器类：继承TF实现类，实现CDCard接口
+~~~java
+public class CDAdapterTF extends TFCardImpl implements CDCard{
+    // adapter 读取 TFRead
+    @Override
+    public String CDRead() {
+        System.out.println("adapter read TFcard");
+        String msg = TFread();
+        return msg;
+    }
+
+    // CDWrite 写入 TFwrite
+    @Override
+    public void CDWrite(String msg) {
+        TFwrite(msg);
+    }
+
+
+    @Override
+    public String TFread() {
+        return super.TFread();
+    }
+
+    @Override
+    public void TFwrite(String msg) {
+        super.TFwrite(msg);
+    }
+}
+~~~
+
+* 缺点
+~~~text
+类适配器模式违背了合成复用原则，类适配器是客户类有一个接口规范的情况下可用，反之不可用。
+~~~
+
+###对象适配器模式
+
+* 实现方式
+~~~text
+对象适配器模式可采用将现有组件引入适配器类中，该类同时实现当前系统的业务接口
+~~~
+
+![img_0.png](image-SJMS/对象适配器模式.png)
+
+* 适配器继承目标接口，聚合客户类
+~~~java
+public class CDAdapterTF  implements CDCard {
+
+    // 直接关联被适配类
+    private TFCard tfCard;
+
+    // 通过构造函数传入具体需要适配的被适配类对象  
+    public CDAdapterTF(TFCard tfCard){
+        this.tfCard = tfCard;
+    }
+
+    // adapter 读取 TFRead
+    @Override
+    public String CDRead() {
+        System.out.println("adapter read TFcard");
+        String msg = tfCard.TFread();
+        return msg;
+    }
+
+    // CDWrite 写入 TFwrite
+    @Override
+    public void CDWrite(String msg) {
+        tfCard.TFwrite(msg);
+    }
+}
+~~~
+
+* 调用
+~~~java
+public class Client {
+    public static void main(String[] args) {
+
+        Computer computer = new Computer();
+        //读取cd卡中数据
+        String MSG = computer.readCD(new CDCardImpl());
+        System.out.println("msg: " + MSG);
+
+        //电脑读取TF卡
+
+        //类适配器模式
+        //String mag2 = computer.readCD(new CDAdapterTF());
+        //System.out.println("TFcard msg: " + mag2);
+
+        //对象适配器模式
+        CDAdapterTF cdAdapterTF = new CDAdapterTF(new TFCardImpl());
+        String msg = cdAdapterTF.CDRead();
+        System.out.println(msg);
+
+        //写入TF卡
+    }
+}
+~~~
+
+* 注意
+~~~text
+还有一个适配器模式是接口适配器模式，当不希望实现一个接口中所有的方法时，可以创建一个抽象类 Adapter，实现所有方法。而此时我们只需要继承该抽象类即可
+~~~
+
+* 适用场景
+~~~text
+以前开发的系统存在满足新系统功能需求的类，但其接口同新接口的接口不一致
+使用第三方提供的组件，但组件接口定义和自己要求的接口定义不同
+~~~
+
 ## 装饰者模式 (Facade)
+
+* 定义
+~~~text
+指在不改变现有对象结构的情况下，动态的给该对象添加一些职责（即添加其额外功能）的模式
+~~~
+
+* 结构
+~~~text
+抽象构件角色（Component）：定义一个抽象接口以规范准备接收附加责任的对象
+具体构建角色（Concrete Component）：实现抽象构建，通过装饰角色为其添加一些职责
+
+抽象装饰角色（Decorator）：继承或实现抽象构件，并包含具体构件的实例，可以通过其子类扩展具体构件的功能
+具体装饰角色（Concrete Decorator）：实现抽象装饰的相关方法，并给具体构件对象添加附加的责任
+~~~
+
+* 例：快餐店
+
+![img_0.png](image-SJMS/装饰者模式.png)
+
+* 抽象构件者
+~~~java
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public abstract class FastFood {
+
+    private float price;//价格
+    private String desc;//描述
+
+    /**
+     * 计算金额方法
+     * */
+    public abstract float cost();
+}
+~~~
+
+* 抽象装饰者，继承、聚合了 抽象构件角色
+~~~java
+public abstract class Garnish extends FastFood{
+
+    //声明快餐类类型的变量
+    private FastFood fastFood;
+
+    //全参
+    public Garnish(float price, String desc, FastFood fastFood) {
+        super(price, desc);
+        this.fastFood = fastFood;
+    }
+
+    public FastFood getFastFood() {
+        return fastFood;
+    }
+
+    public void setFastFood(FastFood fastFood) {
+        this.fastFood = fastFood;
+    }
+}
+~~~
+
+* 具体装饰者
+~~~java
+public class Egg extends Garnish{
+
+    public Egg(FastFood fastFood){
+        super(1,"鸡蛋",fastFood);
+    }
+
+    //计算总价
+    @Override
+    public float cost() {
+        return getPrice() + getFastFood().cost();
+    }
+
+    @Override
+    public String getDesc() {
+        return super.getDesc() + getFastFood().getDesc();
+    }
+}
+~~~
+
+* 客户端
+~~~java
+public class Client {
+    public static void main(String[] args) {
+
+        //点分炒饭
+        FastFood food = new FriedRice();
+        System.out.println(food);
+
+        //点份炒饭加鸡蛋
+        food = new Egg(food);
+        System.out.println(food.cost() + " " + food.getDesc());
+
+        //点份炒饭加鸡蛋和培根
+        food = new Bacon(food);
+        System.out.println(food.cost() + " " + food.getDesc());
+    }
+}
+~~~
+
+* 好处
+~~~text
+1.装饰者模式可以带来比继承更加灵活的扩展功能，使用更加方便，可以通过组合不同的装饰者对象获取具有不同行为状态的多样性结果。
+    装饰者模式比继承具有更好的扩展性，完美的遵循开闭原则，继承是静态的附加责任，装饰者则是动态的附加责任。
+2.装饰者和被装饰者独立发展，不会相互耦合，装饰者模式继承的替代模式，装饰者模式可以动态扩展一个实现类的功能
+~~~
+
+* 使用场景
+~~~text
+1.当不能采用继承的方式对系统进行扩展或者采用继承不利于系统扩展和维护时，不能采用继承主要分为两类：
+    a.第一类是系统中存在大量独立的扩展，为支持每一种组合将产生大量的子类，使得子类呈爆炸式增长
+    b.第二类是因为类定义不能继承（如被final修饰）
+2.在不影响其他对象的情况下，以动态、透明的方式给单个对象添加职责
+3.当对象的功能要求可以动态的添加，也可以动态的撤销
+~~~
 
 ## 桥接模式
 
@@ -1577,11 +1938,87 @@ stu和stu1是同一个对象，就会产生将stu1对象中name属性修改为�
 
 # 行为型模式
 
+* 概述
+~~~text
+1.行为型模式用于描述程序在运行时复杂的流程控制，即描述多个类或对象之间怎样互相协作共同完成单个对象都无法完成的任务，它涉及算法和对象间职责分配
+    行为型模式分为类行为型模式和对象行为型模式。前者采用继承机制在类间分派行为，后者采用组合或聚合的在对象间分配行为。
+2.由于组合关系或聚合关系比继承关系耦合度低，满足”合成复用原则“，所以对象行为模式比类行为模式具有更大的灵活性
+~~~
+
 ## 观察者模式 (Observer)
+
+* 定义
+~~~text
+又被称为 发布-订阅模式（Publish-Subscribe），他定义了一种 一对多 的依赖关系，让多个 观察者对象 同时监听某一 主题对象。
+这个主题对象在状态变化时，会通知所有的观察者对象，使他们能够自动更新自己。
+~~~
+
+* 结构
+~~~text
+1.抽象主题（抽象被观察者，Subject）：抽象主题角色把所有观察者对象保存在一个集合中，每个被观察者都可以有任意数量的观察者，抽象主题提供一个接口，可以增加或删除观察者对象
+2.具体对象（具体被观察者，ConcreteSubject）：该角色将有关状态存入具体观察者对象，在具体主题的内部状态发生改变时，给所有注册过的观察者发送通知。
+
+3.抽象观察者（观察者的抽象类，Observer）：定义了一个更新接口，使得在得到主题更改通知时更新自己
+4.具体观察者（ConcreteObserver）：实现抽象观察者定义的更新接口，使得在得到主题更改通知时更新自己的状态
+~~~
+
+* 例：用户订阅公众号
+
+~~~text
+在使用微信公众号时，大家都有这样的体验，当你关注的公众号中有新内容更新时，它就会推送给关注公众号的微信用户端。
+我们使用观察者模式来模拟这样的场景，微信用户就是观察者，公众号就是被观察者，多个用户订阅一个公众号。
+~~~
+
+![img_0.png](image-SJMS/观察者模式.png)
+
+
+* 优点
+~~~text
+1.降低了目标和观察者之间的耦合关系，两者之间是抽象耦合关系
+2.被观察者发送通知，所有注册的观察者都能收到信息（广播机制）
+~~~
+
+* 缺点
+~~~text
+1.如果观察者越来越多，耗时也就越长
+2.如果被观察者有循环依赖的话，被观察者发送通知会使观察者循环调用，导致系统奔溃
+~~~
+
+* 使用场景
+~~~text
+1.对象间存在 一对多 关系，一个对象的状态发生改变会影响其他对象
+2.当一个抽象模型有两个方面，其中一个方面依赖另外一个方面
+~~~
 
 ## 策略模式 (Strategy)
 
+* 定义
+~~~text
+该模式定义了一系列算法，并将每个算法封装起来，使他们可以互相替代，且算法的变化不会影响使用算法的客户。策略模式属于
+对象行为模式，它通过对算法进行封装，把使用算法的责任和算法的实现分割开来，并委派给不同的对象对这些算法进行管理
+~~~
+
+* 结构
+~~~text
+抽象策略类（Strategy）：这是一个抽象角色，通常由一个接口或抽象类实现。此角色给出所有的具体策略类所需的接口
+具体策略类（Concrete Strategy）：实现了抽象策略定义的接口，提供了具体的算法实现或行为
+环境类（Context）：持有一个策略类的引用，最终给客户端调用
+~~~
+
+* 例：促销活动
+~~~text
+一家百货公司在定年度的促销活动，针对不同的节日（春节、中秋、国庆）推出不同的促销活动，由销售员将促销活动展示给客户
+~~~
+
+![img_0.png](image-SJMS/策略模式.png)
+
+
+
+
+
 ## 模板方法模式 (Template Method)
+
+
 
 ## 命令模式
 

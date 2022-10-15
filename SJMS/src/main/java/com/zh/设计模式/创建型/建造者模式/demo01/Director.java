@@ -11,7 +11,7 @@ public class Director {
         this.builder = builder;
     }
 
-    //组装自行车的功能
+    //组装自行车的方法
     public Bike construct(){
         builder.buildFrame();
         builder.buildSeat();
